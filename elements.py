@@ -2,14 +2,14 @@ import numpy as np
 
 
 class Node:
-    def __init__(self, x, y, value = 0, node_next = None, node_prev = None,
+    def __init__(self, x, y, value = 0, node_right = None, node_left = None,
                  node_above = None, node_under = None,
                  node_diag_up_left = None, node_diag_down_right = None):
         self.x = x
         self.y = y
         self.value = value
-        self._next : Node = node_next
-        self._prev : Node = node_prev
+        self._right : Node = node_right
+        self._left : Node = node_left
         self._above : Node = node_above
         self._under : Node = node_under
         self._diag_up_left : Node = node_diag_up_left
@@ -26,20 +26,20 @@ class Node:
     
     # Getters and setters for nodes
     @property
-    def next(self):
-        return self._next
+    def right(self):
+        return self._right
     
-    @next.setter
-    def next(self, node):
-        self._next = node
+    @right.setter
+    def right(self, node):
+        self._right = node
 
     @property
-    def prev(self):
-        return self._prev
+    def left(self):
+        return self._left
     
-    @prev.setter
-    def prev(self, node):
-        self._prev = node
+    @left.setter
+    def left(self, node):
+        self._left = node
 
     @property
     def above(self):
@@ -99,16 +99,16 @@ class Mesh:
         self._n = n
         self._nodes = nodes
     
-    def is_on_border_left(self, i: int) -> bool:
-        return i % self._n == 0
-    
-    def is_on_border_right(self, i: int) -> bool:
+    def is_on_border_top(self, i: int) -> bool:
         return (i+1) % self._n == 0
     
-    def is_on_border_top(self, i: int) -> bool:
-        return i >= self._n * (self._n - 1)
+    def is_on_border_right(self, i: int) -> bool:
+        return i >= (self._n - 1) * self._n
     
     def is_on_border_bottom(self, i: int) -> bool:
+        return i % self._n == 0
+    
+    def is_on_border_left(self, i: int) -> bool:
         return i < self._n
 
     def size(self) -> int:

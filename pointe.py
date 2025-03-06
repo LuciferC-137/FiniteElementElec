@@ -1,8 +1,7 @@
-import time
 import numpy as np
-import matplotlib.pyplot as plt
 from elements import Mesh, Node, Element
-from plotting import plot_mesh_anim, plot_mesh_with_controls
+from plotting import plot_mesh_anim, plot_mesh_nodes_with_controls, \
+    plot_mesh_elements_with_controls
 
 # --------------------------- PARAMETERS ---------------------------
 
@@ -36,27 +35,32 @@ mesh : Mesh = Mesh(n, nodes)
 for i in range(n*n):
     node : Node = mesh[i]
     if not mesh.is_on_border_right(i):
-        node.next = nodes[i+1]
+        node.right = nodes[i+n]
     if not mesh.is_on_border_left(i):
-        node.prev = nodes[i-1]
+        node.left = nodes[i-n]
     if not mesh.is_on_border_bottom(i):
-        node.under = nodes[i-n]
+        node.under = nodes[i-1]
     if not mesh.is_on_border_top(i):
-        node.above = nodes[i+n]
+        node.above = nodes[i+1]
     if not mesh.is_on_border_bottom(i) and not mesh.is_on_border_right(i):
-        node.diag_down_right = nodes[i-n+1]
+        node.diag_down_right = nodes[i+n-1]
     if not mesh.is_on_border_top(i) and not mesh.is_on_border_left(i):
-        node.diag_up_left = nodes[i+n-1]
+        node.diag_up_left = nodes[i-n+1]
 
 # Creating Elements
 elements : dict[Element] = {}
-for i in range(n*n):
-    if i % 2 == 0:
-        if (i+1) % n != 0 and i < n*(n-1):
-            elements[i] = Element(nodes[i], nodes[i+1], nodes[i+n])
-    else:
-        if i % n != 0 and i < n*(n-1):
-            elements[i] = Element(nodes[i], nodes[i+n], nodes[i+n-1])
+element_index = 0
+for i in range(n-1):
+    for j in range(n-1):
+        node1 = nodes[i * n + j]
+        node2 = nodes[i * n + j + 1]
+        node3 = nodes[(i + 1) * n + j]
+        node4 = nodes[(i + 1) * n + j + 1]
+        elements[element_index] = Element(node1, node2, node3)
+        element_index += 1
+        elements[element_index] = Element(node2, node3, node4)
+        element_index += 1
 
 # Plotting
-plot_mesh_with_controls(mesh)
+plot_mesh_nodes_with_controls(mesh)
+plot_mesh_elements_with_controls(mesh, elements)
