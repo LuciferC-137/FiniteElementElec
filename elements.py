@@ -2,7 +2,7 @@ import numpy as np
 
 
 class Node:
-    def __init__(self, x, y, value = 0, node_right = None, node_left = None,
+    def __init__(self, x, y, value = None, node_right = None, node_left = None,
                  node_above = None, node_under = None,
                  node_diag_up_left = None, node_diag_down_right = None,
                  index = None):
@@ -147,6 +147,11 @@ class Mesh:
     def __getitem__(self, key) -> Node:
         return self._nodes[key]
     
+    def angle_from_center(self, i) -> Node:
+        dx = self._nodes[i].x - self.peak_node.x
+        dy = self._nodes[i].y - self.peak_node.y
+        return np.arctan2(dy, dx)
+    
     @property
     def n(self) -> int:
         return self._n
@@ -154,3 +159,7 @@ class Mesh:
     @property
     def elements(self) -> dict[Element]:
         return self._elements
+
+    @property
+    def peak_node(self) -> Node:
+        return self._nodes[self._n * (self._n - 1) // 2]

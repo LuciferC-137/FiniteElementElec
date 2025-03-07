@@ -1,13 +1,13 @@
 import numpy as np
-from elements import Element, Mesh
+from elements import Element, Mesh, Node
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button
 
-def plot_node(mesh: Mesh, ax, i, color):
-    ax.scatter(mesh[i].x, mesh[i].y, color=color)
+def plot_node(node: Node, ax, color):
+    ax.scatter(node.x, node.y, color=color)
 
 def plot_node_and_links(mesh: Mesh, ax, i, color):
-    plot_node(mesh, ax, i, color)
+    plot_node(mesh[i], ax, color)
     if mesh[i].right:
         ax.plot([mesh[i].x, mesh[i].right.x],
                 [mesh[i].y, mesh[i].right.y], '-', color=color)
@@ -179,13 +179,19 @@ def plot_mesh_boundary_conditions(mesh: Mesh):
     # Plot red nodes for border with higher z-order
     for i in range(n*n):
         if mesh.is_on_border(i):
-            plot_node(mesh, ax, i, 'red')
+            plot_node(mesh[i], ax, 'red')
             ax.scatter(mesh[i].x, mesh[i].y, color='red', zorder=3)
+            if mesh[i].value is not None:
+                ax.text(mesh[i].x, mesh[i].y, f'{mesh[i].value:.3f}',
+                        color='black', fontsize=8, ha='center',
+                        va='center', zorder=4)
     # Plot green nodes for peak with higher z-order
     for i in range(n*n):
         if mesh.is_in_peak(i):
-            plot_node(mesh, ax, i, 'green')
+            plot_node(mesh[i], ax, 'green')
             ax.scatter(mesh[i].x, mesh[i].y, color='green', zorder=3)
+    # Plot yellow nodes for peak node
+    ax.scatter(mesh.peak_node.x, mesh.peak_node.y, color='yellow', zorder=3)
     plt.show()
 
 def plot_potential(mesh: Mesh, u: np.ndarray) -> None:
@@ -194,9 +200,27 @@ def plot_potential(mesh: Mesh, u: np.ndarray) -> None:
     z = u.reshape((mesh.n, mesh.n))
 
     plt.figure()
-    plt.contourf(x.reshape((mesh.n, mesh.n)), y.reshape((mesh.n, mesh.n)), z, cmap='viridis')
+    plt.contourf(x.reshape((mesh.n, mesh.n)),
+                 y.reshape((mesh.n, mesh.n)), z, cmap='viridis')
     plt.colorbar(label='Potential')
     plt.xlabel('x')
     plt.ylabel('y')
     plt.title('Potential Distribution')
+    plt.show()
+
+def plot_electric_field(mesh: Mesh, u: np.ndarray) -> None:
+    x = np.array([node.x for node in mesh._nodes.values()])
+    y = np.array([node.y for node in mesh._nodes.values()])
+    z = u.reshape((mesh.n, mesh.n))
+
+    dx, dy = np.gradient(z)
+    magnitude = np.sqrt(dx**2 + dy**2)
+
+    plt.figure()
+    plt.contourf(x.reshape((mesh.n, mesh.n)),
+                 y.reshape((mesh.n, mesh.n)), magnitude, cmap='viridis')
+    plt.colorbar(label='Electric Field Intensity')
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.title('Electric Field')
     plt.show()
