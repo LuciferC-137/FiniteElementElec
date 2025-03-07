@@ -4,7 +4,8 @@ import numpy as np
 class Node:
     def __init__(self, x, y, value = 0, node_right = None, node_left = None,
                  node_above = None, node_under = None,
-                 node_diag_up_left = None, node_diag_down_right = None):
+                 node_diag_up_left = None, node_diag_down_right = None,
+                 index = None):
         self.x = x
         self.y = y
         self.value = value
@@ -14,6 +15,7 @@ class Node:
         self._under : Node = node_under
         self._diag_up_left : Node = node_diag_up_left
         self._diag_down_right : Node = node_diag_down_right
+        self.index = index
 
     def distance(self, node) -> float:
         return np.sqrt((self.x - node.x) ** 2 + (self.y - node.y) ** 2)
@@ -112,6 +114,20 @@ class Mesh:
                 element_index += 1
                 self._elements[element_index] = Element(node2, node3, node4)
                 element_index += 1
+
+        # Assign indices to nodes
+        for index, node in self._nodes.items():
+            node.index = index
+    
+    def is_in_peak(self, i: int) -> bool:
+        return i % self._n <= self._n // 2 \
+            and i < self._n * self._n // 2
+    
+    def is_on_border(self, i: int) -> bool:
+        return self.is_on_border_top(i) \
+            or self.is_on_border_right(i) \
+            or self.is_on_border_bottom(i) \
+            or self.is_on_border_left(i)
     
     def is_on_border_top(self, i: int) -> bool:
         return (i+1) % self._n == 0
@@ -132,9 +148,9 @@ class Mesh:
         return self._nodes[key]
     
     @property
-    def n(self):
+    def n(self) -> int:
         return self._n
     
     @property
-    def elements(self):
+    def elements(self) -> dict[Element]:
         return self._elements

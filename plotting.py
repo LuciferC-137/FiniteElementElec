@@ -1,10 +1,13 @@
+import numpy as np
 from elements import Element, Mesh
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button
 
-
 def plot_node(mesh: Mesh, ax, i, color):
     ax.scatter(mesh[i].x, mesh[i].y, color=color)
+
+def plot_node_and_links(mesh: Mesh, ax, i, color):
+    plot_node(mesh, ax, i, color)
     if mesh[i].right:
         ax.plot([mesh[i].x, mesh[i].right.x],
                 [mesh[i].y, mesh[i].right.y], '-', color=color)
@@ -36,12 +39,12 @@ def plot_mesh_anim(mesh: Mesh):
     n = mesh.n
     current = 0
     for i in range(n*n):
-        plot_node(ax, i, 'blue')
+        plot_node_and_links(ax, i, 'blue')
     while True:
         if not plt.fignum_exists(fig.number):
             break
-        plot_node(ax, (current-1)%(n*n), 'blue')
-        plot_node(ax, current, 'red')
+        plot_node_and_links(ax, (current-1)%(n*n), 'blue')
+        plot_node_and_links(ax, current, 'red')
         current = (current + 1)%(n*n)
         plt.draw()
         plt.pause(0.1)
@@ -56,7 +59,7 @@ def plot_mesh_nodes_with_controls(mesh: Mesh):
 
     # Initial plot
     for i in range(n*n):
-        plot_node(mesh, ax, i, 'blue')
+        plot_node_and_links(mesh, ax, i, 'blue')
     current_plot, = ax.plot([], [], 'ro')
 
     # Slider
@@ -78,8 +81,8 @@ def plot_mesh_nodes_with_controls(mesh: Mesh):
         current = int(slider.val)
         ax.clear()
         for i in range(n*n):
-            plot_node(mesh, ax, i, 'blue')
-        plot_node(mesh, ax, current, 'red')
+            plot_node_and_links(mesh, ax, i, 'blue')
+        plot_node_and_links(mesh, ax, current, 'red')
         plt.draw()
 
     def prev_iteration(event):
@@ -117,7 +120,7 @@ def plot_mesh_elements_with_controls(mesh: Mesh):
 
     # Initial plot
     for i in range(n*n):
-        plot_node(mesh, ax, i, 'blue')
+        plot_node_and_links(mesh, ax, i, 'blue')
     current_plot, = ax.plot([], [], 'ro')
 
     # Slider
@@ -139,7 +142,7 @@ def plot_mesh_elements_with_controls(mesh: Mesh):
         current = int(slider.val)
         ax.clear()
         for i in range(n*n):
-            plot_node(mesh, ax, i, 'blue')
+            plot_node_and_links(mesh, ax, i, 'blue')
         plot_element(mesh.elements[current], ax, 'red')
         plt.draw()
 
@@ -165,4 +168,35 @@ def plot_mesh_elements_with_controls(mesh: Mesh):
     btn_next.on_clicked(next_iteration)
     btn_auto.on_clicked(toggle_auto)
 
+    plt.show()
+
+def plot_mesh_boundary_conditions(mesh: Mesh):
+    fig, ax = plt.subplots()
+    n = mesh.n
+    # Plot blue lines in the background with lower z-order
+    for i in range(n*n):
+        plot_node_and_links(mesh, ax, i, 'blue')
+    # Plot red nodes for border with higher z-order
+    for i in range(n*n):
+        if mesh.is_on_border(i):
+            plot_node(mesh, ax, i, 'red')
+            ax.scatter(mesh[i].x, mesh[i].y, color='red', zorder=3)
+    # Plot green nodes for peak with higher z-order
+    for i in range(n*n):
+        if mesh.is_in_peak(i):
+            plot_node(mesh, ax, i, 'green')
+            ax.scatter(mesh[i].x, mesh[i].y, color='green', zorder=3)
+    plt.show()
+
+def plot_potential(mesh: Mesh, u: np.ndarray) -> None:
+    x = np.array([node.x for node in mesh._nodes.values()])
+    y = np.array([node.y for node in mesh._nodes.values()])
+    z = u.reshape((mesh.n, mesh.n))
+
+    plt.figure()
+    plt.contourf(x.reshape((mesh.n, mesh.n)), y.reshape((mesh.n, mesh.n)), z, cmap='viridis')
+    plt.colorbar(label='Potential')
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.title('Potential Distribution')
     plt.show()
