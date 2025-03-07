@@ -3,8 +3,13 @@ from elements import Element, Mesh, Node
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button
 
+YELLOW = '\033[93m'
+RED = '\033[91m'
+RESET = '\033[0m'
+
 def plot_node(node: Node, ax, color):
     ax.scatter(node.x, node.y, color=color)
+
 
 def plot_node_and_links(mesh: Mesh, ax, i, color):
     plot_node(mesh[i], ax, color)
@@ -27,12 +32,14 @@ def plot_node_and_links(mesh: Mesh, ax, i, color):
         ax.plot([mesh[i].x, mesh[i].diag_down_right.x],
                 [mesh[i].y, mesh[i].diag_down_right.y], '-', color=color)
 
+
 def plot_element(element: Element, ax, color='blue'):
     x = [element.node1.x, element.node2.x, element.node3.x, element.node1.x]
     y = [element.node1.y, element.node2.y, element.node3.y, element.node1.y]
     ax.fill(x, y, color=color, alpha=0.5)
     ax.plot(x, y, '-', color=color)
-        
+
+
 def plot_mesh_anim(mesh: Mesh):
     plt.ion()
     fig, ax = plt.subplots()
@@ -109,6 +116,7 @@ def plot_mesh_nodes_with_controls(mesh: Mesh):
 
     plt.show()
 
+
 def plot_mesh_elements_with_controls(mesh: Mesh):
     fig, ax = plt.subplots()
     plt.subplots_adjust(bottom=0.25)
@@ -170,7 +178,11 @@ def plot_mesh_elements_with_controls(mesh: Mesh):
 
     plt.show()
 
+
 def plot_mesh_boundary_conditions(mesh: Mesh):
+    if (mesh.n > 30):
+        input(f"{YELLOW}You are trying to plot {mesh.n*mesh.n} nodes."
+              f" Continue ? [Enter]{RESET}")
     fig, ax = plt.subplots()
     n = mesh.n
     # Plot blue lines in the background with lower z-order
@@ -190,9 +202,10 @@ def plot_mesh_boundary_conditions(mesh: Mesh):
         if mesh.is_in_peak(i):
             plot_node(mesh[i], ax, 'green')
             ax.scatter(mesh[i].x, mesh[i].y, color='green', zorder=3)
-    # Plot yellow nodes for peak node
+    # Plot a yellow nodes for peak node
     ax.scatter(mesh.peak_node.x, mesh.peak_node.y, color='yellow', zorder=3)
     plt.show()
+
 
 def plot_potential(mesh: Mesh, u: np.ndarray) -> None:
     x = np.array([node.x for node in mesh._nodes.values()])
@@ -200,13 +213,14 @@ def plot_potential(mesh: Mesh, u: np.ndarray) -> None:
     z = u.reshape((mesh.n, mesh.n))
 
     plt.figure()
-    plt.contourf(x.reshape((mesh.n, mesh.n)),
-                 y.reshape((mesh.n, mesh.n)), z, cmap='viridis')
+    plt.imshow(z, extent=(x.min(), x.max(), y.min(), y.max()),
+               origin='lower', cmap='viridis')
     plt.colorbar(label='Potential')
     plt.xlabel('x')
     plt.ylabel('y')
     plt.title('Potential Distribution')
     plt.show()
+
 
 def plot_electric_field(mesh: Mesh, u: np.ndarray) -> None:
     x = np.array([node.x for node in mesh._nodes.values()])
@@ -217,8 +231,8 @@ def plot_electric_field(mesh: Mesh, u: np.ndarray) -> None:
     magnitude = np.sqrt(dx**2 + dy**2)
 
     plt.figure()
-    plt.contourf(x.reshape((mesh.n, mesh.n)),
-                 y.reshape((mesh.n, mesh.n)), magnitude, cmap='viridis')
+    plt.imshow(magnitude, extent=(x.min(), x.max(), y.min(), y.max()),
+               origin='lower', cmap='viridis')
     plt.colorbar(label='Electric Field Intensity')
     plt.xlabel('x')
     plt.ylabel('y')

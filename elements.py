@@ -25,8 +25,7 @@ class Node:
 
     def __repr__(self):
         return f"Node({self.x}, {self.y})"
-    
-    # Getters and setters for nodes
+
     @property
     def right(self):
         return self._right
@@ -120,9 +119,9 @@ class Mesh:
             node.index = index
     
     def is_in_peak(self, i: int) -> bool:
-        return i % self._n <= self._n // 2 \
-            and i < self._n * self._n // 2
-    
+        return i % self._n <= self._n // 2 - self._n % 2\
+            and i < (self._n * self._n // 2)
+
     def is_on_border(self, i: int) -> bool:
         return self.is_on_border_top(i) \
             or self.is_on_border_right(i) \
@@ -162,4 +161,6 @@ class Mesh:
 
     @property
     def peak_node(self) -> Node:
-        return self._nodes[self._n * (self._n - 1) // 2]
+        if self._n % 2 == 0:
+            return self._nodes[(self._n * (self._n - 1)) // 2]
+        return self._nodes[(self._n * self._n) // 2 - 1]

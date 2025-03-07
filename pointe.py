@@ -7,7 +7,7 @@ from plotting import plot_mesh_anim, plot_mesh_boundary_conditions,\
 # --------------------------- PARAMETERS ---------------------------
 
 # Number of nodes in one line
-n = 100
+n = 101
 # Length of the square (physical)
 L = 1
 # Maximum potential at the boudary
@@ -54,13 +54,13 @@ for i in range(mesh.size()):
         if mesh.is_in_peak(i):
             mesh[i].value = 0
         elif mesh.is_on_border(i):
-            mesh[i].value = potential
             mesh[i].value = potential * (1 - (mesh.angle_from_center(i)
                                               - np.pi / 4)**2
                                 / (3 * np.pi / 4)**2 )
 
 # Creating Elements
 mesh.build_elements()
+
 
 def compute_rigidity_matrix(mesh: Mesh) -> np.ndarray:
     n_nodes = mesh.size()
@@ -73,6 +73,7 @@ def compute_rigidity_matrix(mesh: Mesh) -> np.ndarray:
             for j in range(3):
                 K[nodes[i].index, nodes[j].index] += Ke[i, j]
     return K
+
 
 def compute_element_stiffness_matrix(nodes: list[Node]) -> np.ndarray:
     x1, y1 = nodes[0].x, nodes[0].y
@@ -87,6 +88,7 @@ def compute_element_stiffness_matrix(nodes: list[Node]) -> np.ndarray:
     Ke = (1 / (4 * 2 / H / H)) * (np.outer(b, b) + np.outer(c, c))
     
     return Ke
+
 
 def apply_boundary_conditions(K: np.ndarray, F: np.ndarray,
                                mesh: Mesh, potential: float) -> None:
