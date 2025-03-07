@@ -106,14 +106,14 @@ def plot_mesh_nodes_with_controls(mesh: Mesh):
 
     plt.show()
 
-def plot_mesh_elements_with_controls(mesh: Mesh, elements: dict[Element]):
+def plot_mesh_elements_with_controls(mesh: Mesh):
     fig, ax = plt.subplots()
     plt.subplots_adjust(bottom=0.25)
     
     n = mesh.n
     current = 0
 
-    n_el = len(elements)
+    n_el = len(mesh.elements)
 
     # Initial plot
     for i in range(n*n):
@@ -140,7 +140,7 @@ def plot_mesh_elements_with_controls(mesh: Mesh, elements: dict[Element]):
         ax.clear()
         for i in range(n*n):
             plot_node(mesh, ax, i, 'blue')
-        plot_element(elements[current], ax, 'red')
+        plot_element(mesh.elements[current], ax, 'red')
         plt.draw()
 
     def prev_iteration(event):

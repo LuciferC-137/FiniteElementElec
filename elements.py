@@ -98,6 +98,20 @@ class Mesh:
     def __init__(self, n: int, nodes : dict[Node]):
         self._n = n
         self._nodes = nodes
+        self._elements : dict[Element] = {}
+    
+    def build_elements(self) -> None:
+        element_index = 0
+        for i in range(self._n-1):
+            for j in range(self._n-1):
+                node1 = self._nodes[i * self._n + j]
+                node2 = self._nodes[i * self._n + j + 1]
+                node3 = self._nodes[(i + 1) * self._n + j]
+                node4 = self._nodes[(i + 1) * self._n + j + 1]
+                self._elements[element_index] = Element(node1, node2, node3)
+                element_index += 1
+                self._elements[element_index] = Element(node2, node3, node4)
+                element_index += 1
     
     def is_on_border_top(self, i: int) -> bool:
         return (i+1) % self._n == 0
@@ -120,3 +134,7 @@ class Mesh:
     @property
     def n(self):
         return self._n
+    
+    @property
+    def elements(self):
+        return self._elements

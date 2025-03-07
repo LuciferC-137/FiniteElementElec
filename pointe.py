@@ -48,19 +48,8 @@ for i in range(n*n):
         node.diag_up_left = nodes[i-n+1]
 
 # Creating Elements
-elements : dict[Element] = {}
-element_index = 0
-for i in range(n-1):
-    for j in range(n-1):
-        node1 = nodes[i * n + j]
-        node2 = nodes[i * n + j + 1]
-        node3 = nodes[(i + 1) * n + j]
-        node4 = nodes[(i + 1) * n + j + 1]
-        elements[element_index] = Element(node1, node2, node3)
-        element_index += 1
-        elements[element_index] = Element(node2, node3, node4)
-        element_index += 1
+mesh.build_elements()
 
 # Plotting
 plot_mesh_nodes_with_controls(mesh)
-plot_mesh_elements_with_controls(mesh, elements)
+plot_mesh_elements_with_controls(mesh)
