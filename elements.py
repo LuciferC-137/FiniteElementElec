@@ -204,8 +204,9 @@ class SquareMesh(Mesh):
 
 
 class CircularMesh(Mesh):
-    def __init__(self, n, nodes : dict[Node]):
+    def __init__(self, n, nodes : dict[Node], theta: float = 0,):
         super().__init__(n, nodes)
+        self._theta = theta
 
     def _ring_start(self, k: int) -> int:
         if k == 0:
@@ -217,11 +218,10 @@ class CircularMesh(Mesh):
         return i >= start
 
     def is_in_peak(self, i: int) -> bool:
-        return i == 0
+        return np.abs(self.angle_from_center(i)) >= self._theta
 
     def angle_from_center(self, i: int) -> float:
-        node = self._nodes[i]
-        return np.arctan2(node.y, node.x)
+        return np.arctan2(self[i].y, self[i].x)
 
     @property
     def _n_layers(self) -> int:
@@ -281,7 +281,8 @@ class MeshBuilder:
                 node_index+=1
         return nodes
 
-    def build_circular_mesh(self, n: int, L: float) -> CircularMesh:
+    def build_circular_mesh(self, n: int, L: float,
+                            theta: float = 0) -> CircularMesh:
         """
         Method to build a square mesh of size n x n with a side length of L.
 
@@ -296,7 +297,7 @@ class MeshBuilder:
         -------
             CircularMesh: The mesh object.
         """
-        mesh = CircularMesh(n, self._create_circular_node_dict(n, L))
+        mesh = CircularMesh(n, self._create_circular_node_dict(n, L), theta)
         self._index_circular_neighbors(mesh)
         mesh.build_elements()
         return mesh

@@ -1,8 +1,9 @@
 import numpy as np
-from elements import Element, Mesh, SquareMesh, Node
+from elements import CircularMesh, Element, Mesh, SquareMesh, Node
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.widgets import Slider, Button
+import matplotlib.tri as tri
 
 YELLOW = '\033[93m'
 RED = '\033[91m'
@@ -252,8 +253,8 @@ class Plotter:
         ax : Axes
         n = mesh.n
         # Plot blue lines in the background with lower z-order
-        for i in range(n*n):
-            Plotter._plot_node_and_links(mesh, ax, i, color_mesh)
+        for node in mesh:
+            Plotter._plot_node_and_links(node, ax, color_mesh)
         # Plot red nodes for border with higher z-order
         for i in range(n*n):
             if mesh.is_on_border(i):
@@ -270,6 +271,61 @@ class Plotter:
                 ax.scatter(mesh[i].x, mesh[i].y, color=color_peak, zorder=3)
         # Plot a yellow nodes for peak node
         ax.scatter(mesh.peak_node.x, mesh.peak_node.y,
+                   color=color_central_node, zorder=3)
+        plt.show()
+    
+    @staticmethod
+    def plot_mesh_circle_boundary(mesh: CircularMesh, color_mesh: str = "blue",
+                                      color_peak: str = "green",
+                                      color_bound: str = "red",
+                                      color_central_node: str = "yellow"):
+        """
+        Method to plot the mesh with all nodes inside the peak highlighted in
+        "color_peak" and the nodes of the external boundary in "color_bound".
+        The central node is highlighted in "color_central_node".
+        
+        Parameters
+        ----------
+            mesh : Mesh
+                The mesh to be plotted.
+            color_mesh : str
+                The color of the mesh. Default: "blue"
+            color_peak : str
+                The color of the peak nodes. Default: "green"
+            color_bound : str
+                The color of the boundary nodes. Default: "red"
+            color_central_node : str
+                The color of the central node. Default: "yellow"
+
+        """
+        if not (isinstance(mesh, CircularMesh)):
+            raise ValueError(f"{RED}The mesh must be"
+                             f" a CircularMesh object when using "
+                             f"'plot_mesh_square_boudary'.{RESET}")
+        if (mesh.size() > 400):
+            input(f"{YELLOW}You are trying to plot {mesh.size()} nodes."
+                f" Continue ? [Enter]{RESET}")
+        fig, ax = plt.subplots()
+        ax : Axes
+        # Plot blue lines in the background with lower z-order
+        for node in mesh:
+            Plotter._plot_node_and_links(node, ax, color_mesh)
+        # Plot red nodes for border with higher z-order
+        for node in mesh:
+            if mesh.is_on_border(node.index):
+                Plotter._plot_node(node, ax, color_bound)
+                ax.scatter(node.x, node.y, color=color_bound, zorder=3)
+                if node.value is not None:
+                    ax.text(node.x, node.y, f'{node.value:.3f}',
+                            color='black', fontsize=8, ha='center',
+                            va='center', zorder=4)
+        # Plot green nodes for peak with higher z-order
+        for node in mesh:
+            if mesh.is_in_peak(node.index):
+                Plotter._plot_node(node, ax, color_peak)
+                ax.scatter(node.x, node.y, color=color_peak, zorder=3)
+        # Plot a yellow nodes for peak node
+        ax.scatter(mesh[0].x, mesh[0].y,
                    color=color_central_node, zorder=3)
         plt.show()
 
@@ -291,13 +347,12 @@ class Plotter:
                 The colormap to be used. Default: 'viridis'
 
         """
+        if not isinstance(mesh, SquareMesh):
+            raise ValueError(f"{RED}The mesh must be a SquareMesh object"
+                             f" when using 'plot_potential'.{RESET}")
         x = np.array([node.x for node in mesh])
         y = np.array([node.y for node in mesh])
-        if isinstance(mesh, SquareMesh):
-            z = u.reshape((mesh.n, mesh.n))
-        else:
-            z = u
-
+        z = u.reshape((mesh.n, mesh.n))
         plt.figure()
         plt.imshow(z, extent=(x.min(), x.max(), y.min(), y.max()),
                    origin='lower', cmap=cmap)
@@ -308,7 +363,7 @@ class Plotter:
         plt.show()
 
     @staticmethod
-    def plot_electric_field(mesh: Mesh, u: np.ndarray,
+    def plot_electric_field(mesh: SquareMesh, u: np.ndarray,
                             cmap: str = 'viridis') -> None:
         """
         Method to plot the electric field distribution in the mesh according
@@ -327,21 +382,93 @@ class Plotter:
                 The colormap to be used. Default: 'viridis'
 
         """
+        if not isinstance(mesh, SquareMesh):
+            raise ValueError(f"{RED}The mesh must be a SquareMesh object"
+                             f" when using 'plot_potential'.{RESET}")
         x = np.array([node.x for node in mesh])
         y = np.array([node.y for node in mesh])
-        if isinstance(mesh, SquareMesh):
-            z = u.reshape((mesh.n, mesh.n))
-        else:
-            z = u
+        z = u.reshape((mesh.n, mesh.n))
 
         dx, dy = np.gradient(z)
         magnitude = np.sqrt(dx**2 + dy**2)
 
         plt.figure()
         plt.imshow(magnitude, extent=(x.min(), x.max(), y.min(), y.max()),
-                origin='lower', cmap='viridis')
+                origin='lower', cmap=cmap)
         plt.colorbar(label='Electric Field Intensity')
         plt.xlabel('x')
         plt.ylabel('y')
         plt.title('Electric Field')
+        plt.show()
+    
+    def plot_continous(mesh: Mesh, z: np.ndarray,
+                                  cmap: str = 'viridis',
+                                  margin: float = 0.05) -> None:
+        """
+        Method to plot the potential distribution in the mesh and compute 
+        the intermediate values for an image of 'res' pixels in length.
+
+        Parameters
+        ----------
+            mesh : Mesh
+                The mesh object.
+            z : np.ndarray[float]
+                The array with the continuous values
+            cmap : str
+                The colormap to be used. Default: 'viridis'
+            res : int
+                The resolution of one side of the image (in pixels)
+
+        """
+        
+        x = np.array([node.x for node in mesh])
+        y = np.array([node.y for node in mesh])      
+        
+        x_min, x_max = np.min(x), np.max(x)
+        y_min, y_max = np.min(y), np.max(y)
+        
+        margin = margin * max(x_max - x_min, y_max - y_min)
+        x_min -= margin
+        x_max += margin
+        y_min -= margin
+        y_max += margin
+        
+        plt.figure(figsize=(10, 8))
+        plt.imshow(z, extent=[x_min, x_max, y_min, y_max], origin='lower', 
+                cmap=cmap, interpolation='bilinear')
+        plt.colorbar(label='Potential')
+        plt.xlabel('x')
+        plt.ylabel('y')
+        plt.title('Continous potential over the mesh')
+        plt.tight_layout()
+        plt.show()
+
+    def plot_discontinuous_field(mesh: Mesh, e: np.ndarray,
+                                 cmap: str ='viridis'):
+        x = np.array([node.x for node in mesh])
+        y = np.array([node.y for node in mesh])
+
+        triangles = []
+        E_values = []
+
+        for idx, element in mesh.elements.items():
+            n0, n1, n2 = element.nodes
+            triangles.append([n0.index, n1.index, n2.index])
+            E_values.append(e[idx]) 
+
+        triangles = np.array(triangles)
+        E_values = np.array(E_values)
+
+        triang = tri.Triangulation(x, y, triangles)
+
+        plt.figure(figsize=(10, 8))
+        # 'flat' shading -> one value per triangle
+        tpc = plt.tripcolor(triang, facecolors=E_values, cmap=cmap,
+                            shading='flat', edgecolors='k', linewidth=0.2)
+        plt.colorbar(tpc, label='|E| Electric field intensity')
+        plt.title("Electric field |∇V|")
+        plt.xlabel("x")
+        plt.ylabel("y")
+        plt.axis("equal")
+        plt.tight_layout()
         plt.show()

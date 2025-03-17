@@ -1,5 +1,5 @@
 import numpy as np
-from elements import Mesh, Element
+from elements import Mesh, Element, Node
 
 RED = '\033[91m'
 RESET = '\033[0m'
@@ -46,8 +46,15 @@ class Solver:
         self._check_mesh_or_abort()
         n_nodes = self._mesh.size()
         K = np.zeros((n_nodes, n_nodes))
+        prc, i = 0, 0
         for element in self._mesh.iter_elements():
+            # Printing progression
             element : Element
+            i+=1
+            new_prc = int(100 * (i / len(self._mesh.elements)))
+            if new_prc != prc:
+                prc = new_prc
+                print(f"Computing Matrix: {prc:3d}%       ", end='\r')
             Ke = self.compute_element_stiffness_matrix(element)
             for i_local, node_i in enumerate(element.nodes):
                 for j_local, node_j in enumerate(element.nodes):
@@ -113,3 +120,92 @@ class Solver:
         Ke = np.transpose(He) @ DT @ Ae @ D @ He * Te
         
         return Ke
+    
+    @staticmethod
+    def compute_continous_solutions(mesh: Mesh, u: np.ndarray,
+                                    res: int = 500,
+                                    margin: float = 0.05) -> np.ndarray:
+        
+        x = np.array([node.x for node in mesh])
+        y = np.array([node.y for node in mesh])
+        
+        x_min, x_max = np.min(x), np.max(x)
+        y_min, y_max = np.min(y), np.max(y)
+        
+        margin_val = margin * max(x_max - x_min, y_max - y_min)
+        x_min -= margin_val
+        x_max += margin_val
+        y_min -= margin_val
+        y_max += margin_val
+        
+        x_grid = np.linspace(x_min, x_max, res)
+        y_grid = np.linspace(y_min, y_max, res)
+        X, Y = np.meshgrid(x_grid, y_grid)
+
+        z = np.zeros_like(X)
+        
+        prc = 0
+        for i in range(res):
+            for j in range(res):
+                new_prc = int(100 * (i * res + j) / (res * res))
+                if new_prc != prc:
+                    prc = new_prc
+                    print("Computing continuous solutions: "
+                        f"{prc:3d}%           ", end='\r')
+                
+                pixel_x, pixel_y = X[i, j], Y[i, j]
+                found = False
+                
+                for element_idx, element in mesh.elements.items():
+                    nodes : list[Node] = element.nodes
+                    x1, y1 = nodes[0].x, nodes[0].y
+                    x2, y2 = nodes[1].x, nodes[1].y
+                    x3, y3 = nodes[2].x, nodes[2].y
+                    
+                    denominator = (y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3)
+                    
+                    if abs(denominator) < 1e-10:
+                        continue
+                    
+                    lambda1 = ((y2 - y3) * (pixel_x - x3) + (x3 - x2)
+                            * (pixel_y - y3)) / denominator
+                    lambda2 = ((y3 - y1) * (pixel_x - x3) + (x1 - x3)
+                            * (pixel_y - y3)) / denominator
+                    lambda3 = 1 - lambda1 - lambda2
+                    
+                    if 0 <= lambda1 <= 1 and 0 <= lambda2 <= 1 \
+                       and 0 <= lambda3 <= 1:
+                        potential = lambda1 * u[nodes[0].index] + lambda2 \
+                            * u[nodes[1].index] + lambda3 * u[nodes[2].index]
+                        z[i, j] = potential
+                        found = True
+                        break
+                
+                if not found:
+                    z[i, j] = np.nan
+        return z
+    
+    @staticmethod
+    def compute_element_gradients(mesh : Mesh, u : np.ndarray):
+        e = {}
+        for element_idx, element in mesh.elements.items():
+            nodes : list[Node] = element.nodes
+            x1, y1 = nodes[0].x, nodes[0].y
+            x2, y2 = nodes[1].x, nodes[1].y
+            x3, y3 = nodes[2].x, nodes[2].y
+            A = np.array([
+                [1, x1, y1],
+                [1, x2, y2],
+                [1, x3, y3]
+            ])
+            v = np.array([u[nodes[0].index], u[nodes[1].index], u[nodes[2].index]])
+            
+            try:
+                coeffs = np.linalg.solve(A, v)
+                ex, ey = -coeffs[1], -coeffs[2]
+            except np.linalg.LinAlgError:
+                ex, ey = 0, 0
+
+            norm = np.sqrt(ex**2 + ey**2)
+            e[element_idx] = norm
+        return e
