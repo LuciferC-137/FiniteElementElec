@@ -188,3 +188,55 @@ class Mesh:
         if self._n % 2 == 0:
             return self._nodes[(self._n * (self._n - 1)) // 2]
         return self._nodes[(self._n * self._n) // 2 - 1]
+
+
+class MeshBuilder:
+    def __init__(self):
+        pass
+
+    def build_mesh(self, n: int, L: float) -> Mesh:
+        """
+        Method to build a square mesh of size n x n with a side length of L.
+
+        Parameters
+        ----------
+            n: int
+                The number of nodes on one side of the square.
+            L: float
+                The side length of the square.
+
+        Returns
+        -------
+            Mesh: The mesh object.
+        """
+        mesh = Mesh(n, self._create_node_dict(n, L))
+        self._index_neighbors(mesh, n)
+        return mesh
+
+    def _index_neighbors(self, mesh: Mesh, n) -> None:
+        for i in range(n*n):
+            node : Node = mesh[i]
+            if not mesh.is_on_border_right(i):
+                node.right = mesh[i+n]
+            if not mesh.is_on_border_left(i):
+                node.left = mesh[i-n]
+            if not mesh.is_on_border_bottom(i):
+                node.under = mesh[i-1]
+            if not mesh.is_on_border_top(i):
+                node.above = mesh[i+1]
+            if not mesh.is_on_border_bottom(i) \
+               and not mesh.is_on_border_right(i):
+                node.diag_down_right = mesh[i+n-1]
+            if not mesh.is_on_border_top(i) and not mesh.is_on_border_left(i):
+                node.diag_up_left = mesh[i-n+1]
+
+    def _create_node_dict(self, n, L) -> dict[Node]:
+        x = np.linspace(0, L, n)
+        y = np.linspace(0, L, n)
+        nodes : dict[Node] = {}
+        node_index = 0
+        for i in range(n):
+            for j in range(n):
+                nodes[node_index] = Node(x[i], y[j])
+                node_index+=1
+        return nodes
