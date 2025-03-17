@@ -1,5 +1,5 @@
 import numpy as np
-from elements import Element, Mesh, Node
+from elements import Element, Mesh, SquareMesh, Node
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.widgets import Slider, Button
@@ -20,29 +20,14 @@ class Plotter:
         ax.scatter(node.x, node.y, color=color)
 
     @staticmethod
-    def plot_node_and_links(mesh: Mesh, ax: Axes, i: int, color: str = "blue"):
+    def plot_node_and_links(mesh: SquareMesh, ax: Axes,
+                            i: int, color: str = "blue"):
         """
         Internal method of the plotter.
         """
         Plotter.plot_node(mesh[i], ax, color)
-        if mesh[i].right:
-            ax.plot([mesh[i].x, mesh[i].right.x],
-                    [mesh[i].y, mesh[i].right.y], '-', color=color)
-        if mesh[i].left:
-            ax.plot([mesh[i].x, mesh[i].left.x],
-                    [mesh[i].y, mesh[i].left.y], '-', color=color)
-        if mesh[i].above:
-            ax.plot([mesh[i].x, mesh[i].above.x],
-                    [mesh[i].y, mesh[i].above.y], '-', color=color)
-        if mesh[i].under:
-            ax.plot([mesh[i].x, mesh[i].under.x],
-                    [mesh[i].y, mesh[i].under.y], '-', color=color)
-        if mesh[i].diag_up_left:
-            ax.plot([mesh[i].x, mesh[i].diag_up_left.x],
-                    [mesh[i].y, mesh[i].diag_up_left.y], '-', color=color)
-        if mesh[i].diag_down_right:
-            ax.plot([mesh[i].x, mesh[i].diag_down_right.x],
-                    [mesh[i].y, mesh[i].diag_down_right.y], '-', color=color)
+        for node in mesh[i].neighbors:
+            ax.plot([mesh[i].x, node.x], [mesh[i].y, node.y], '-', color=color)
 
     @staticmethod
     def plot_element(element: Element, ax: Axes, color: str ='blue'):
@@ -55,7 +40,7 @@ class Plotter:
         ax.plot(x, y, '-', color=color)
 
     @staticmethod
-    def plot_mesh_nodes_with_controls(mesh: Mesh, color_mesh: str = "blue",
+    def plot_mesh_nodes_with_controls(mesh: SquareMesh, color_mesh: str = "blue",
                                       color_high: str = "red"):
         """
         Method to plot the mesh with one node highlithed in the defined color.
@@ -133,7 +118,7 @@ class Plotter:
         plt.show()
 
     @staticmethod
-    def plot_mesh_elements_with_controls(mesh: Mesh, color_mesh: str = "blue",
+    def plot_mesh_elements_with_controls(mesh: SquareMesh, color_mesh: str = "blue",
                                       color_high: str = "red"):
         """
         Method to plot the mesh with one element highlithed in red.
@@ -214,7 +199,7 @@ class Plotter:
         plt.show()
 
     @staticmethod
-    def plot_mesh_boundary_conditions(mesh: Mesh, color_mesh: str = "blue",
+    def plot_mesh_boundary_conditions(mesh: SquareMesh, color_mesh: str = "blue",
                                       color_peak: str = "green",
                                       color_bound: str = "red",
                                       color_central_node: str = "yellow"):
@@ -266,7 +251,7 @@ class Plotter:
         plt.show()
 
     @staticmethod
-    def plot_potential(mesh: Mesh, u: np.ndarray,
+    def plot_potential(mesh: SquareMesh, u: np.ndarray,
                        cmap: str = 'viridis') -> None:
         """
         Method to plot the potential distribution in the mesh according
@@ -283,8 +268,8 @@ class Plotter:
                 The colormap to be used. Default: 'viridis'
 
         """
-        x = np.array([node.x for node in mesh._nodes.values()])
-        y = np.array([node.y for node in mesh._nodes.values()])
+        x = np.array([node.x for node in mesh])
+        y = np.array([node.y for node in mesh])
         z = u.reshape((mesh.n, mesh.n))
 
         plt.figure()
@@ -316,8 +301,8 @@ class Plotter:
                 The colormap to be used. Default: 'viridis'
 
         """
-        x = np.array([node.x for node in mesh._nodes.values()])
-        y = np.array([node.y for node in mesh._nodes.values()])
+        x = np.array([node.x for node in mesh])
+        y = np.array([node.y for node in mesh])
         z = u.reshape((mesh.n, mesh.n))
 
         dx, dy = np.gradient(z)

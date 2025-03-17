@@ -15,7 +15,7 @@ potential = 1.0
 # ------------------------------ MAIN ------------------------------
 
 # Creating mesh
-mesh : Mesh = MeshBuilder().build_mesh(n, L)
+mesh : Mesh = MeshBuilder().build_square_mesh(n, L)
 
 # Fixing nodes that are subject to a boudary condition
 for i in range(mesh.size()):

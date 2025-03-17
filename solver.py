@@ -46,7 +46,7 @@ class Solver:
         self._check_mesh_or_abort()
         n_nodes = self._mesh.size()
         K = np.zeros((n_nodes, n_nodes))
-        for element in self._mesh.elements.values():
+        for element in self._mesh.iter_elements():
             element : Element
             Ke = self.compute_element_stiffness_matrix(element)
             for i_local, node_i in enumerate(element.nodes):

@@ -1,78 +1,46 @@
+from abc import ABC, abstractmethod
+from typing import Iterator
 import numpy as np
 
 
 class Node:
-    def __init__(self, x, y, value = None, node_right = None, node_left = None,
-                 node_above = None, node_under = None,
-                 node_diag_up_left = None, node_diag_down_right = None,
-                 index = None):
-        self.x = x
-        self.y = y
-        self.value = value
-        self._right : Node = node_right
-        self._left : Node = node_left
-        self._above : Node = node_above
-        self._under : Node = node_under
-        self._diag_up_left : Node = node_diag_up_left
-        self._diag_down_right : Node = node_diag_down_right
-        self.index = index
-
-    def distance(self, node) -> float:
-        return np.sqrt((self.x - node.x) ** 2 + (self.y - node.y) ** 2)
-
+    def __init__(self, x, y, value = None, neighbors: list['Node'] = [],
+                 index: int = None):
+        self._x : float = x
+        self._y : float = y
+        self.value : float = value
+        self._neighbors : list['Node'] = []
+        self._index : int = index
+    
     def __str__(self):
         return f"({self.x}, {self.y})"
 
     def __repr__(self):
         return f"Node({self.x}, {self.y})"
 
-    @property
-    def right(self):
-        return self._right
+    def distance(self, node : 'Node') -> float:
+        return np.sqrt((self.x - node.x) ** 2 + (self.y - node.y) ** 2)
     
-    @right.setter
-    def right(self, node):
-        self._right = node
+    @property
+    def index(self) -> int:
+        return self._index
+    
+    @index.setter
+    def index(self, index: int) -> None:
+        self._index = index
 
     @property
-    def left(self):
-        return self._left
+    def neighbors(self) -> list['Node']:
+        return self._neighbors
     
-    @left.setter
-    def left(self, node):
-        self._left = node
+    @property
+    def x(self) -> float:
+        return self._x
+    
+    @property
+    def y(self) -> float:
+        return self._y
 
-    @property
-    def above(self):
-        return self._above
-    
-    @above.setter
-    def above(self, node):
-        self._above = node
-
-    @property
-    def under(self):
-        return self._under
-    
-    @under.setter
-    def under(self, node):
-        self._under = node
-    
-    @property
-    def diag_up_left(self):
-        return self._diag_up_left
-    
-    @diag_up_left.setter
-    def diag_up_left(self, node):
-        self._diag_up_left = node
-
-    @property
-    def diag_down_right(self):
-        return self._diag_down_right
-    
-    @diag_down_right.setter
-    def diag_down_right(self, node):
-        self._diag_down_right = node
 
 class Element:
     def __init__(self, node1 : Node, node2 : Node, node3 : Node):
@@ -98,28 +66,53 @@ class Element:
     @property
     def nodes(self) -> list[Node]:
         return [self._node1, self._node2, self._node3]
-    
-    @property
-    def x1(self) -> float:
-        return self._node1.x
-    
-    @property
-    def y1(self) -> float:
-        return self._node1.y
-    
-    @property
-    def x2(self) -> float:
-        if self._node1.x == self._node2.x:
-            return self._node3.x
-        return self._node2.x
-    
-    @property
-    def y2(self) -> float:
-        if self._node1.y == self._node2.y:
-            return self._node3.y
-        return self._node2.y
 
-class Mesh:
+
+class Mesh(ABC):
+    def __init__(self, n: int, nodes : dict[Node]):
+        self._n = n
+        self._nodes : dict[Node] = nodes
+        self._elements : dict[Element] = {}
+    
+    def __getitem__(self, key) -> Node:
+        return self._nodes[key]
+    
+    def __iter__(self) -> Iterator[Node]:
+        return iter(self._nodes.values())
+    
+    def iter_elements(self) -> Iterator[Element]:
+        return iter(self._elements.values())
+    
+    def size(self) -> int:
+        return len(self._nodes)
+    
+    @property
+    def n(self) -> int:
+        return self._n
+    
+    @property
+    def elements(self) -> dict[Element]:
+        return self._elements
+    
+    @abstractmethod
+    def build_elements(self) -> None:
+        pass
+
+    @abstractmethod
+    def is_in_peak(self, i: int) -> bool:
+        pass
+
+    @abstractmethod
+    def is_on_border(self, i: int) -> bool:
+        pass
+
+    @abstractmethod
+    def angle_from_center(self, i) -> float:
+        pass
+
+
+
+class SquareMesh(Mesh):
     def __init__(self, n: int, nodes : dict[Node]):
         self._n = n
         self._nodes : dict[Node] = nodes
@@ -137,10 +130,6 @@ class Mesh:
                 element_index += 1
                 self._elements[element_index] = Element(node2, node3, node4)
                 element_index += 1
-
-        # Assign indices to nodes
-        for index, node in self._nodes.items():
-            node.index = index
     
     def is_in_peak(self, i: int) -> bool:
         return i % self._n <= self._n // 2 - self._n % 2\
@@ -163,25 +152,11 @@ class Mesh:
     
     def is_on_border_left(self, i: int) -> bool:
         return i < self._n
-
-    def size(self) -> int:
-        return len(self._nodes)
     
-    def __getitem__(self, key) -> Node:
-        return self._nodes[key]
-    
-    def angle_from_center(self, i) -> Node:
+    def angle_from_center(self, i) -> float:
         dx = self._nodes[i].x - self.peak_node.x
         dy = self._nodes[i].y - self.peak_node.y
         return np.arctan2(dy, dx)
-    
-    @property
-    def n(self) -> int:
-        return self._n
-    
-    @property
-    def elements(self) -> dict[Element]:
-        return self._elements
 
     @property
     def peak_node(self) -> Node:
@@ -194,7 +169,7 @@ class MeshBuilder:
     def __init__(self):
         pass
 
-    def build_mesh(self, n: int, L: float) -> Mesh:
+    def build_square_mesh(self, n: int, L: float) -> SquareMesh:
         """
         Method to build a square mesh of size n x n with a side length of L.
 
@@ -209,28 +184,29 @@ class MeshBuilder:
         -------
             Mesh: The mesh object.
         """
-        mesh = Mesh(n, self._create_node_dict(n, L))
-        self._index_neighbors(mesh, n)
+        mesh = SquareMesh(n, self._create_square_node_dict(n, L))
+        self._index_square_neighbors(mesh, n)
         return mesh
 
-    def _index_neighbors(self, mesh: Mesh, n) -> None:
+    def _index_square_neighbors(self, mesh: SquareMesh, n) -> None:
         for i in range(n*n):
             node : Node = mesh[i]
+            node.index = i
             if not mesh.is_on_border_right(i):
-                node.right = mesh[i+n]
+                node.neighbors.append(mesh[i+n])
             if not mesh.is_on_border_left(i):
-                node.left = mesh[i-n]
+                node.neighbors.append(mesh[i-n])
             if not mesh.is_on_border_bottom(i):
-                node.under = mesh[i-1]
+                node.neighbors.append(mesh[i-1])
             if not mesh.is_on_border_top(i):
-                node.above = mesh[i+1]
+                node.neighbors.append(mesh[i+1])
             if not mesh.is_on_border_bottom(i) \
                and not mesh.is_on_border_right(i):
-                node.diag_down_right = mesh[i+n-1]
+                node.neighbors.append(mesh[i+n-1])
             if not mesh.is_on_border_top(i) and not mesh.is_on_border_left(i):
-                node.diag_up_left = mesh[i-n+1]
+                node.neighbors.append(mesh[i-n+1])
 
-    def _create_node_dict(self, n, L) -> dict[Node]:
+    def _create_square_node_dict(self, n, L) -> dict[Node]:
         x = np.linspace(0, L, n)
         y = np.linspace(0, L, n)
         nodes : dict[Node] = {}
