@@ -1,6 +1,6 @@
 import numpy as np
-from elements import Mesh, MeshBuilder, Node
-from plotting import plot_potential, plot_electric_field
+from elements import Mesh, MeshBuilder
+from plotting import Plotter
 from solver import Solver
 
 # --------------------------- PARAMETERS ---------------------------
@@ -39,6 +39,6 @@ solver = Solver(mesh)
 
 u = solver.solve_mesh()
 
-#plot_mesh_boundary_conditions(mesh)
-plot_potential(mesh, u)
-plot_electric_field(mesh, u)
+# Plotting
+Plotter.plot_potential(mesh, u)
+Plotter.plot_electric_field(mesh, u)
