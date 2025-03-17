@@ -6,7 +6,7 @@ from solver import Solver
 # --------------------------- PARAMETERS ---------------------------
 
 # Number of nodes in one line
-n = 30
+n = 10
 # Length of the square (physical)
 L = 1
 # Maximum potential at the boudary
@@ -30,9 +30,6 @@ for i in range(mesh.size()):
             mesh[i].value = potential * (1 - (mesh.angle_from_center(i)
                                               - np.pi / 4)**2
                                          / (3 * np.pi / 4)**2 )
-
-# Creating Elements
-mesh.build_elements()
 
 # Initializing solver
 solver = Solver(mesh)

@@ -13,24 +13,25 @@ RESET = '\033[0m'
 class Plotter:
     
     @staticmethod
-    def plot_node(node: Node, ax: Axes, color: str = "blue"):
+    def _plot_node(node: Node, ax: Axes, color: str = "blue"):
         """
         Internal method of the plotter.
         """
         ax.scatter(node.x, node.y, color=color)
 
     @staticmethod
-    def plot_node_and_links(mesh: SquareMesh, ax: Axes,
-                            i: int, color: str = "blue"):
+    def _plot_node_and_links(node: Node, ax: Axes,
+                            color: str = "blue"):
         """
         Internal method of the plotter.
         """
-        Plotter.plot_node(mesh[i], ax, color)
-        for node in mesh[i].neighbors:
-            ax.plot([mesh[i].x, node.x], [mesh[i].y, node.y], '-', color=color)
+        Plotter._plot_node(node, ax, color)
+        for neighbor in node.neighbors:
+            ax.plot([node.x, neighbor.x], [node.y, neighbor.y],
+                    '-', color=color)
 
     @staticmethod
-    def plot_element(element: Element, ax: Axes, color: str ='blue'):
+    def _plot_element(element: Element, ax: Axes, color: str ='blue'):
         """
         Internal method of the plotter.
         """
@@ -40,7 +41,7 @@ class Plotter:
         ax.plot(x, y, '-', color=color)
 
     @staticmethod
-    def plot_mesh_nodes_with_controls(mesh: SquareMesh, color_mesh: str = "blue",
+    def plot_mesh_nodes_with_controls(mesh: Mesh, color_mesh: str = "blue",
                                       color_high: str = "red"):
         """
         Method to plot the mesh with one node highlithed in the defined color.
@@ -65,14 +66,16 @@ class Plotter:
         current = 0
 
         # Initial plot
-        for i in range(n*n):
-            Plotter.plot_node_and_links(mesh, ax, i, color_mesh)
+        for node in mesh:
+            Plotter._plot_node_and_links(node, ax, color_mesh)
+        Plotter._plot_node_and_links(mesh[0], ax, color_high)
         current_plot, = ax.plot([], [], 'ro')
 
         # Slider
         ax_slider = plt.axes([0.25, 0.1, 0.65, 0.03],
                              facecolor='lightgoldenrodyellow')
-        slider = Slider(ax_slider, 'Iteration', 0, n*n-1, valinit=0, valstep=1)
+        slider = Slider(ax_slider, 'Iteration', 0, mesh.size() - 1,
+                        valinit=0, valstep=1)
 
         # Buttons
         ax_prev = plt.axes([0.1, 0.025, 0.1, 0.04])
@@ -88,16 +91,16 @@ class Plotter:
             nonlocal current
             current = int(slider.val)
             ax.clear()
-            for i in range(n*n):
-                Plotter.plot_node_and_links(mesh, ax, i, color_mesh)
-            Plotter.plot_node_and_links(mesh, ax, current, color_high)
+            for node in mesh:
+                Plotter._plot_node_and_links(node, ax, color_mesh)
+            Plotter._plot_node_and_links(mesh[val], ax, color_high)
             plt.draw()
 
         def prev_iteration(event):
-            slider.set_val((slider.val - 1) % (n*n))
+            slider.set_val((slider.val - 1) % mesh.size())
 
         def next_iteration(event):
-            slider.set_val((slider.val + 1) % (n*n))
+            slider.set_val((slider.val + 1) % mesh.size())
 
         def toggle_auto(event):
             nonlocal auto_play
@@ -118,8 +121,8 @@ class Plotter:
         plt.show()
 
     @staticmethod
-    def plot_mesh_elements_with_controls(mesh: SquareMesh, color_mesh: str = "blue",
-                                      color_high: str = "red"):
+    def plot_mesh_elements_with_controls(mesh: Mesh, color_mesh: str = "blue",
+                                         color_high: str = "red"):
         """
         Method to plot the mesh with one element highlithed in red.
         The highlithed element will change every 0.1 seconds in the
@@ -143,17 +146,16 @@ class Plotter:
         n = mesh.n
         current = 0
 
-        n_el = len(mesh.elements)
-
         # Initial plot
-        for i in range(n*n):
-            Plotter.plot_node_and_links(mesh, ax, i, 'blue')
+        for node in mesh:
+            Plotter._plot_node_and_links(node, ax, color_mesh)
         current_plot, = ax.plot([], [], 'ro')
 
         # Slider
         ax_slider = plt.axes([0.25, 0.1, 0.65, 0.03],
                              facecolor='lightgoldenrodyellow')
-        slider = Slider(ax_slider, 'Iteration', 0, n_el, valinit=0, valstep=1)
+        slider = Slider(ax_slider, 'Iteration', 0, len(mesh.elements) - 1,
+                        valinit=0, valstep=1)
 
         # Buttons
         ax_prev = plt.axes([0.1, 0.025, 0.1, 0.04])
@@ -169,16 +171,16 @@ class Plotter:
             nonlocal current
             current = int(slider.val)
             ax.clear()
-            for i in range(n*n):
-                Plotter.plot_node_and_links(mesh, ax, i, color_mesh)
-            Plotter.plot_element(mesh.elements[current], ax, color_high)
+            for node in mesh:
+                Plotter._plot_node_and_links(node, ax, color_mesh)
+            Plotter._plot_element(mesh.elements[current], ax, color_high)
             plt.draw()
 
         def prev_iteration(event):
-            slider.set_val((slider.val - 1) % n_el)
+            slider.set_val((slider.val - 1) % len(mesh.elements))
 
         def next_iteration(event):
-            slider.set_val((slider.val + 1) % n_el)
+            slider.set_val((slider.val + 1) % len(mesh.elements))
 
         def toggle_auto(event):
             nonlocal auto_play
@@ -197,9 +199,26 @@ class Plotter:
         btn_auto.on_clicked(toggle_auto)
 
         plt.show()
+    
+    def plot_mesh_all_elements(mesh: Mesh):
+        """
+        Method to plot the mesh with all elements highlighted in blue.
+        
+        Parameters
+        ----------
+            mesh : Mesh
+                The mesh to be plotted.
+        """
+        fig, ax = plt.subplots()
+        ax : Axes
+        for element in mesh.elements.values():
+            Plotter._plot_element(element, ax, "red")
+        for node in mesh:
+            Plotter._plot_node_and_links(node, ax)
+        plt.show()
 
     @staticmethod
-    def plot_mesh_boundary_conditions(mesh: SquareMesh, color_mesh: str = "blue",
+    def plot_mesh_square_boundary(mesh: SquareMesh, color_mesh: str = "blue",
                                       color_peak: str = "green",
                                       color_bound: str = "red",
                                       color_central_node: str = "yellow"):
@@ -222,6 +241,10 @@ class Plotter:
                 The color of the central node. Default: "yellow"
 
         """
+        if not (isinstance(mesh, SquareMesh)):
+            raise ValueError(f"{RED}The mesh must be"
+                             f" a SquareMesh object when using "
+                             f"'plot_mesh_square_boudary'.{RESET}")
         if (mesh.n > 30):
             input(f"{YELLOW}You are trying to plot {mesh.n*mesh.n} nodes."
                 f" Continue ? [Enter]{RESET}")
@@ -230,11 +253,11 @@ class Plotter:
         n = mesh.n
         # Plot blue lines in the background with lower z-order
         for i in range(n*n):
-            Plotter.plot_node_and_links(mesh, ax, i, color_mesh)
+            Plotter._plot_node_and_links(mesh, ax, i, color_mesh)
         # Plot red nodes for border with higher z-order
         for i in range(n*n):
             if mesh.is_on_border(i):
-                Plotter.plot_node(mesh[i], ax, color_bound)
+                Plotter._plot_node(mesh[i], ax, color_bound)
                 ax.scatter(mesh[i].x, mesh[i].y, color=color_bound, zorder=3)
                 if mesh[i].value is not None:
                     ax.text(mesh[i].x, mesh[i].y, f'{mesh[i].value:.3f}',
@@ -243,7 +266,7 @@ class Plotter:
         # Plot green nodes for peak with higher z-order
         for i in range(n*n):
             if mesh.is_in_peak(i):
-                Plotter.plot_node(mesh[i], ax, color_peak)
+                Plotter._plot_node(mesh[i], ax, color_peak)
                 ax.scatter(mesh[i].x, mesh[i].y, color=color_peak, zorder=3)
         # Plot a yellow nodes for peak node
         ax.scatter(mesh.peak_node.x, mesh.peak_node.y,
@@ -270,11 +293,14 @@ class Plotter:
         """
         x = np.array([node.x for node in mesh])
         y = np.array([node.y for node in mesh])
-        z = u.reshape((mesh.n, mesh.n))
+        if isinstance(mesh, SquareMesh):
+            z = u.reshape((mesh.n, mesh.n))
+        else:
+            z = u
 
         plt.figure()
         plt.imshow(z, extent=(x.min(), x.max(), y.min(), y.max()),
-                origin='lower', cmap=cmap)
+                   origin='lower', cmap=cmap)
         plt.colorbar(label='Potential')
         plt.xlabel('x')
         plt.ylabel('y')
@@ -303,7 +329,10 @@ class Plotter:
         """
         x = np.array([node.x for node in mesh])
         y = np.array([node.y for node in mesh])
-        z = u.reshape((mesh.n, mesh.n))
+        if isinstance(mesh, SquareMesh):
+            z = u.reshape((mesh.n, mesh.n))
+        else:
+            z = u
 
         dx, dy = np.gradient(z)
         magnitude = np.sqrt(dx**2 + dy**2)

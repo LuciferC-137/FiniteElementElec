@@ -1,7 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import Iterator
 import numpy as np
+from math import pi, cos, sin, floor
 
+RED = '\033[91m'
+RESET = '\033[0m'
 
 class Node:
     def __init__(self, x, y, value = None, neighbors: list['Node'] = [],
@@ -17,6 +20,11 @@ class Node:
 
     def __repr__(self):
         return f"Node({self.x}, {self.y})"
+    
+    def __eq__(self, value):
+        if not isinstance(value, Node):
+            return False
+        return self.x == value.x and self.y == value.y
 
     def distance(self, node : 'Node') -> float:
         return np.sqrt((self.x - node.x) ** 2 + (self.y - node.y) ** 2)
@@ -32,7 +40,11 @@ class Node:
     @property
     def neighbors(self) -> list['Node']:
         return self._neighbors
-    
+
+    @neighbors.setter
+    def neighbors(self, neighbors: list['Node']) -> None:
+        self._neighbors = neighbors
+
     @property
     def x(self) -> float:
         return self._x
@@ -47,7 +59,13 @@ class Element:
         self._node1 : Node = node1
         self._node2 : Node = node2
         self._node3 : Node = node3
-    
+
+    def __eq__(self, value):
+        if not isinstance(value, Element):
+            return False
+        return self._node1 == value.node1 and self._node2 == value.node2\
+            and self._node3 == value.node3
+
     def __str__(self):
         return f"Element({self._node1}, {self._node2}, {self._node3})"
     
@@ -93,10 +111,31 @@ class Mesh(ABC):
     @property
     def elements(self) -> dict[Element]:
         return self._elements
-    
-    @abstractmethod
-    def build_elements(self) -> None:
-        pass
+
+    def build_elements(self):
+        self._elements = {}
+        element_index = 0
+        for node1_index, node1 in self._nodes.items():
+            for node2_index, node2 in self._nodes.items():
+                node1 : Node
+                node2 : Node
+                if node2_index <= node1_index:
+                    continue
+                if node2 not in node1.neighbors:
+                    continue
+                for node3_index, node3 in self._nodes.items():
+                    if node3_index <= node2_index \
+                       or node3_index <= node1_index:
+                        continue
+                    if node3 not in node1.neighbors \
+                       or node3 not in node2.neighbors:
+                        continue
+                    element = Element(node1, node2, node3)
+                    self._elements[element_index] = element
+                    element_index += 1
+        if not self._elements:
+            raise ValueError(f"{RED}No element could be created."
+                             f"Check the nodes connectivity.{RESET}")
 
     @abstractmethod
     def is_in_peak(self, i: int) -> bool:
@@ -114,11 +153,10 @@ class Mesh(ABC):
 
 class SquareMesh(Mesh):
     def __init__(self, n: int, nodes : dict[Node]):
-        self._n = n
-        self._nodes : dict[Node] = nodes
-        self._elements : dict[Element] = {}
+        super().__init__(n, nodes)
     
     def build_elements(self) -> None:
+        # Faster method that the default one.
         element_index = 0
         for i in range(self._n-1):
             for j in range(self._n-1):
@@ -165,6 +203,31 @@ class SquareMesh(Mesh):
         return self._nodes[(self._n * self._n) // 2 - 1]
 
 
+class CircularMesh(Mesh):
+    def __init__(self, n, nodes : dict[Node]):
+        super().__init__(n, nodes)
+
+    def _ring_start(self, k: int) -> int:
+        if k == 0:
+            return 0
+        return 1 + 3 * k * (k - 1)
+
+    def is_on_border(self, i: int) -> bool:
+        start = self._ring_start(self._n_layers)
+        return i >= start
+
+    def is_in_peak(self, i: int) -> bool:
+        return i == 0
+
+    def angle_from_center(self, i: int) -> float:
+        node = self._nodes[i]
+        return np.arctan2(node.y, node.x)
+
+    @property
+    def _n_layers(self) -> int:
+        return int(floor(self._n / 6))
+
+
 class MeshBuilder:
     def __init__(self):
         pass
@@ -182,12 +245,13 @@ class MeshBuilder:
 
         Returns
         -------
-            Mesh: The mesh object.
+            SquareMesh: The mesh object.
         """
         mesh = SquareMesh(n, self._create_square_node_dict(n, L))
         self._index_square_neighbors(mesh, n)
+        mesh.build_elements()
         return mesh
-
+    
     def _index_square_neighbors(self, mesh: SquareMesh, n) -> None:
         for i in range(n*n):
             node : Node = mesh[i]
@@ -216,3 +280,69 @@ class MeshBuilder:
                 nodes[node_index] = Node(x[i], y[j])
                 node_index+=1
         return nodes
+
+    def build_circular_mesh(self, n: int, L: float) -> CircularMesh:
+        """
+        Method to build a square mesh of size n x n with a side length of L.
+
+        Parameters
+        ----------
+            n: int
+                The number of nodes on the circumference of the circle.
+            L: float
+                Diamater of the circle.
+
+        Returns
+        -------
+            CircularMesh: The mesh object.
+        """
+        mesh = CircularMesh(n, self._create_circular_node_dict(n, L))
+        self._index_circular_neighbors(mesh)
+        mesh.build_elements()
+        return mesh
+
+    def _create_circular_node_dict(self, n, L) -> dict[Node]:
+        nodes : dict[Node] = {}
+        r = L / 2
+        center = Node(0.0, 0.0)
+        center.index = 0
+        nodes[0] = center
+
+        n_layers = int(floor((n := n / 6)))
+        if n_layers == 0:
+            raise ValueError(f"{RED}The number of nodes on the edge"
+                                f" must be at least 6{RESET}")
+
+        current_index = 1
+        layer_radius = r / n_layers
+
+        for k in range(1, n_layers + 1):
+            num_points = 6 * k
+            angle_step = 2 * pi / num_points
+            r = layer_radius * k
+            for i in range(num_points):
+                theta = i * angle_step
+                x = r * cos(theta)
+                y = r * sin(theta)
+                node = Node(x, y, index = current_index)
+                nodes[current_index] = node
+                current_index += 1
+        return nodes
+    
+    def _index_circular_neighbors(self, mesh: CircularMesh):
+        for node in mesh:
+            closest_nodes = []
+            for neighbor in mesh:
+                if node != neighbor:
+                    distance = node.distance(neighbor)
+                    closest_nodes.append((neighbor, distance))
+
+            closest_nodes.sort(key=lambda x: x[1])
+
+            if not mesh.is_on_border(node.index):
+                number_of_neighbors = 6
+            else:
+                number_of_neighbors = 3
+
+            node.neighbors = [neighbor for neighbor,
+                               _ in closest_nodes[:number_of_neighbors]]
