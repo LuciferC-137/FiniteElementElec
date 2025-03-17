@@ -7,7 +7,7 @@ from plotting import plot_mesh_anim, plot_mesh_boundary_conditions,\
 # --------------------------- PARAMETERS ---------------------------
 
 # Number of nodes in one line
-n = 101
+n = 30
 # Length of the square (physical)
 L = 1
 # Maximum potential at the boudary
@@ -54,9 +54,14 @@ for i in range(mesh.size()):
         if mesh.is_in_peak(i):
             mesh[i].value = 0
         elif mesh.is_on_border(i):
+            # Here, the potential is calculated as a function of the angle
+            # from the center of the square (the peak). The angle
+            # 3 pi / 4 corresponds to the bottom left corner witch is already
+            # at V=0, so we must ensure the border's potential decreases from
+            # its maximum value to 0 when it reaches the peak.
             mesh[i].value = potential * (1 - (mesh.angle_from_center(i)
                                               - np.pi / 4)**2
-                                / (3 * np.pi / 4)**2 )
+                                         / (3 * np.pi / 4)**2 )
 
 # Creating Elements
 mesh.build_elements()
@@ -66,32 +71,35 @@ def compute_rigidity_matrix(mesh: Mesh) -> np.ndarray:
     n_nodes = mesh.size()
     K = np.zeros((n_nodes, n_nodes))
     for element in mesh.elements.values():
-        element: Element
-        nodes = [element.node1, element.node2, element.node3]
-        Ke = compute_element_stiffness_matrix(nodes)
-        for i in range(3):
-            for j in range(3):
-                K[nodes[i].index, nodes[j].index] += Ke[i, j]
+        element : Element
+        Ke = compute_element_stiffness_matrix(element)
+        for i_local, node_i in enumerate(element.nodes):
+            for j_local, node_j in enumerate(element.nodes):
+                K[node_i.index, node_j.index] += Ke[i_local, j_local]
     return K
 
 
-def compute_element_stiffness_matrix(nodes: list[Node]) -> np.ndarray:
-    x1, y1 = nodes[0].x, nodes[0].y
-    x2, y2 = nodes[1].x, nodes[1].y
-    x3, y3 = nodes[2].x, nodes[2].y
+def compute_element_stiffness_matrix(element: Element) -> np.ndarray:
+    nodes = element.nodes
+    x = [node.x for node in nodes]
+    y = [node.y for node in nodes]
 
-    # Computing the derivatives of the shape functions
-    b = np.array([y2 - y3, y3 - y1, y1 - y2])
-    c = np.array([x3 - x2, x1 - x3, x2 - x1])
+    Pe = np.array([[1, x[0], y[0]],
+                   [1, x[1], y[1]],
+                   [1, x[2], y[2]]])
+    Ae = np.array([[1, 0], [0, 1]])
+    He = np.linalg.inv(Pe)
+    Te = 0.5 / H / H
+    D = np.array([[0, 1, 0], [0, 0, 1]])
+    DT = np.array([[0, 0], [1, 0], [0, 1]])
 
-    # Compute the element stiffness matrix
-    Ke = (1 / (4 * 2 / H / H)) * (np.outer(b, b) + np.outer(c, c))
+    Ke = np.transpose(He) @ DT @ Ae @ D @ He * Te
     
     return Ke
 
 
 def apply_boundary_conditions(K: np.ndarray, F: np.ndarray,
-                               mesh: Mesh, potential: float) -> None:
+                               mesh: Mesh) -> None:
     for i in range(mesh.size()):
         if mesh[i].value is not None:
             # Removing the contributions
@@ -104,7 +112,7 @@ K = compute_rigidity_matrix(mesh)
 
 F = np.zeros(mesh.size())
 
-apply_boundary_conditions(K, F, mesh, potential)
+apply_boundary_conditions(K, F, mesh)
 
 u = np.linalg.solve(K, F)
 

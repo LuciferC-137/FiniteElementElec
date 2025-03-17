@@ -94,11 +94,35 @@ class Element:
     @property
     def node3(self) -> Node:
         return self._node3
+    
+    @property
+    def nodes(self) -> list[Node]:
+        return [self._node1, self._node2, self._node3]
+    
+    @property
+    def x1(self) -> float:
+        return self._node1.x
+    
+    @property
+    def y1(self) -> float:
+        return self._node1.y
+    
+    @property
+    def x2(self) -> float:
+        if self._node1.x == self._node2.x:
+            return self._node3.x
+        return self._node2.x
+    
+    @property
+    def y2(self) -> float:
+        if self._node1.y == self._node2.y:
+            return self._node3.y
+        return self._node2.y
 
 class Mesh:
     def __init__(self, n: int, nodes : dict[Node]):
         self._n = n
-        self._nodes = nodes
+        self._nodes : dict[Node] = nodes
         self._elements : dict[Element] = {}
     
     def build_elements(self) -> None:
