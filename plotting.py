@@ -1,5 +1,5 @@
 import numpy as np
-import time
+from logger import Logger
 from elements import CircularMesh, Element, Mesh, SquareMesh, Node
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
@@ -13,6 +13,12 @@ RESET = '\033[0m'
 
 
 class Plotter:
+
+    @staticmethod
+    def _ask_for_continue(mesh: Mesh):
+        if (mesh.size() > 200):
+            Logger().ask_for_continue("You are trying to"
+                                    f" plot {mesh.size()} nodes.")
     
     @staticmethod
     def _plot_node(node: Node, ax: Axes, color: str = "blue"):
@@ -60,6 +66,7 @@ class Plotter:
             color_high : str
                 The color of the highlighted node. Default: "red"
         """
+        Plotter._ask_for_continue(mesh)
         fig, ax = plt.subplots()
         ax : Axes
         plt.subplots_adjust(bottom=0.25)
@@ -211,6 +218,7 @@ class Plotter:
             mesh : Mesh
                 The mesh to be plotted.
         """
+        Plotter._ask_for_continue(mesh)
         fig, ax = plt.subplots()
         ax : Axes
         for element in mesh.elements.values():
@@ -244,12 +252,9 @@ class Plotter:
 
         """
         if not (isinstance(mesh, SquareMesh)):
-            raise ValueError(f"{RED}The mesh must be"
-                             f" a SquareMesh object when using "
-                             f"'plot_mesh_square_boudary'.{RESET}")
-        if (mesh.n > 30):
-            input(f"{YELLOW}You are trying to plot {mesh.n*mesh.n} nodes."
-                f" Continue ? [Enter]{RESET}")
+            Logger().raise_error("The mesh must be a SquareMesh object when"
+                                 " using 'plot_mesh_square_boudary'.")
+        Plotter._ask_for_continue(mesh)
         fig, ax = plt.subplots()
         ax : Axes
         n = mesh.n
@@ -274,7 +279,7 @@ class Plotter:
         ax.scatter(mesh.peak_node.x, mesh.peak_node.y,
                    color=color_central_node, zorder=3)
         plt.show()
-    
+
     @staticmethod
     def plot_mesh_circle_boundary(mesh: CircularMesh, color_mesh: str = "blue",
                                       color_peak: str = "green",
@@ -300,12 +305,9 @@ class Plotter:
 
         """
         if not (isinstance(mesh, CircularMesh)):
-            raise ValueError(f"{RED}The mesh must be"
-                             f" a CircularMesh object when using "
-                             f"'plot_mesh_square_boudary'.{RESET}")
-        if (mesh.size() > 400):
-            input(f"{YELLOW}You are trying to plot {mesh.size()} nodes."
-                f" Continue ? [Enter]{RESET}")
+            Logger().raise_error("The mesh must be a CircularMesh object when"
+                                 " using 'plot_mesh_square_boudary'.")
+        Plotter._ask_for_continue(mesh)
         fig, ax = plt.subplots()
         ax : Axes
         # Plot blue lines in the background with lower z-order
@@ -349,8 +351,8 @@ class Plotter:
 
         """
         if not isinstance(mesh, SquareMesh):
-            raise ValueError(f"{RED}The mesh must be a SquareMesh object"
-                             f" when using 'plot_potential'.{RESET}")
+            Logger().raise_error("The mesh must be a SquareMesh object when"
+                                 " using 'plot_potential'.")
         x = np.array([node.x for node in mesh])
         y = np.array([node.y for node in mesh])
         z = u.reshape((mesh.n, mesh.n))
@@ -384,8 +386,8 @@ class Plotter:
 
         """
         if not isinstance(mesh, SquareMesh):
-            raise ValueError(f"{RED}The mesh must be a SquareMesh object"
-                             f" when using 'plot_potential'.{RESET}")
+            Logger().raise_error("The mesh must be a SquareMesh object when"
+                                 " using 'plot_electric_field'.")
         x = np.array([node.x for node in mesh])
         y = np.array([node.y for node in mesh])
         z = u.reshape((mesh.n, mesh.n))

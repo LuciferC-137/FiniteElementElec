@@ -18,8 +18,8 @@ class Solver:
     
     def _check_mesh_or_abort(self) -> None:
         if not self._check_mesh():
-            raise ValueError(f"{RED}Mesh if not defined, cannot solve!{RESET}")
-    
+            self._logger.raise_error("Mesh is not defined, cannot solve!")
+
     def solve_mesh(self) -> np.ndarray:
         """
         Method to solve the mesh.
@@ -33,7 +33,9 @@ class Solver:
         K = self._compute_rigidity_matrix()
         F = np.zeros(self._mesh.size())
         self._apply_boundary_conditions(K, F, self._mesh)
-        return np.linalg.solve(K, F)
+        u = np.linalg.solve(K, F)
+        self._logger.log("Problem solved !")
+        return u
 
     def _compute_rigidity_matrix(self) -> np.ndarray:
         """
@@ -83,11 +85,14 @@ class Solver:
         """
         for i in range(self._mesh.size()):
             if self._mesh[i].value is not None:
+                self._logger.log_prc("Applying boundary conditions", i,
+                                     self._mesh.size())
                 # Removing the contributions
                 K[i, :] = 0 
                 K[i, i] = 1
                 # Applying the boundary condition
                 F[i] = mesh[i].value
+        self._logger.log_prc_done("Applying boundary conditions")
 
     @staticmethod
     def compute_element_stiffness_matrix(element: Element) -> np.ndarray:

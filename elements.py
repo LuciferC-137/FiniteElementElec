@@ -141,8 +141,8 @@ class Mesh(ABC):
                     element_index += 1
         self._logger.log_prc_done("Building Elements")
         if not self._elements:
-            raise ValueError(f"{RED}No element could be created."
-                             f"Check the nodes connectivity.{RESET}")
+            self._logger.raise_error("No element could be created. "
+                                     "Check the nodes connectivity")
 
     @abstractmethod
     def is_in_peak(self, i: int) -> bool:
@@ -167,6 +167,8 @@ class SquareMesh(Mesh):
         element_index = 0
         for i in range(self._n-1):
             for j in range(self._n-1):
+                self._logger.log_prc("Building Elements",
+                                     element_index, (self._n-1) * (self._n-1))
                 node1 = self._nodes[i * self._n + j]
                 node2 = self._nodes[i * self._n + j + 1]
                 node3 = self._nodes[(i + 1) * self._n + j]
@@ -175,6 +177,7 @@ class SquareMesh(Mesh):
                 element_index += 1
                 self._elements[element_index] = Element(node2, node3, node4)
                 element_index += 1
+        self._logger.log_prc_done("Building Elements")
     
     def is_in_peak(self, i: int) -> bool:
         return i % self._n <= self._n // 2 - self._n % 2\
@@ -261,6 +264,7 @@ class MeshBuilder:
     
     def _index_square_neighbors(self, mesh: SquareMesh, n) -> None:
         for i in range(n*n):
+            self._logger.log_prc("Indexing Square Mesh", i, n*n)
             node : Node = mesh[i]
             node.index = i
             if not mesh.is_on_border_right(i):
@@ -276,6 +280,7 @@ class MeshBuilder:
                 node.neighbors.append(mesh[i+n-1])
             if not mesh.is_on_border_top(i) and not mesh.is_on_border_left(i):
                 node.neighbors.append(mesh[i-n+1])
+        self._logger.log_prc_done("Indexing Square Mesh")
 
     def _create_square_node_dict(self, n, L) -> dict[Node]:
         x = np.linspace(0, L, n)
@@ -318,8 +323,8 @@ class MeshBuilder:
 
         n_layers = int(floor((n := n / 6)))
         if n_layers == 0:
-            raise ValueError(f"{RED}The number of nodes on the edge"
-                                f" must be at least 6{RESET}")
+            self._logger.raise_error("The number of nodes on the edge"
+                                     " must be at least 6")
 
         current_index = 1
         layer_radius = r / n_layers

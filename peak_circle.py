@@ -7,7 +7,7 @@ from logger import Logger
 # --------------------------- PARAMETERS ---------------------------
 
 # Number of nodes in one line
-n = 100
+n = 20
 # Length of the square (physical)
 L = 1
 # Angle of the peak (rad)
@@ -16,11 +16,9 @@ theta0 = 3 * np.pi / 4
 potential = 1.0
 
 # ------------------------------ MAIN ------------------------------
-Logger().log("Creating mesh...")
 # Creating mesh
 mesh : Mesh = MeshBuilder().build_circular_mesh(n, L, theta0)
 
-Logger().log("Setting boundary conditions...")
 # Fixing nodes that are subject to a boudary condition
 for i in range(mesh.size()):
         if mesh.is_in_peak(i):
@@ -32,16 +30,14 @@ for i in range(mesh.size()):
 # Initializing solver
 solver = Solver(mesh)
 
-Logger().log("Solving...")
 # Solving
 u = solver.solve_mesh()
 
-Logger().log("Computing continuous solutions...")
 # Computing the continuous solution
-# z = solver.compute_continous_solutions(mesh, u)
+z = solver.compute_continous_solutions(mesh, u, res=200)
 e = solver.compute_element_gradients(mesh, u)
 
-Logger().log("Plotting...")
 # Plotting
-# Plotter.plot_continous(mesh, z)
+Plotter.plot_mesh_circle_boundary(mesh)
+Plotter.plot_continous(mesh, z)
 Plotter.plot_discontinuous_field(mesh, e)
