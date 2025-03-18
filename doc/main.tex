@@ -1,0 +1,537 @@
+\documentclass{article}
+
+\usepackage{biblatex}
+\addbibresource{biblio.bib}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1.2in]{geometry}
+\usepackage{color}
+\usepackage{amsmath}
+
+\begin{document}
+
+\begin{titlepage}
+    \begin{titlepage}      
+        \begin{center}
+            \includegraphics[width=7cm]{img/Logo_IMT_Atlantique.png}
+            \\[1.9cm]
+            {\LARGE IMT Atlantique}\\[1.5cm]
+            
+			{\color{black} \rule{\textwidth}{1pt}}
+
+            \linespread{1.2}
+            \vspace{0.5cm}
+            \huge {\textbf{Électrostatique : modélisation de l'effet de pointe
+             par méthode des éléments finis}}
+            \vspace{1cm}
+            \linespread{1.2}
+			{\color{black} \rule{\textwidth}{1pt}}
+            \Large {BLOCH Maxime} \\
+            \Large {LEHEL Eliaz} \\[1cm]
+            \Large {Mars 2025}
+            
+        \end{center}
+    \end{titlepage}
+\end{titlepage}
+
+\section*{Introduction}
+
+\hspace{1cm}
+Nous nous proposons dans ce travail d'utiliser la méthode des éléments finis
+pour modéliser l'effet de pointe dans un champ électrostatique.
+
+\section{Situation physique}
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.7]{img/schema.png}
+    \caption{Modélisation de la pointe}
+    \label{fig:pointe}
+\end{figure}
+
+\hspace{0.5cm}
+La figure \ref{fig:pointe} représente une pointe (en gris) dont les bords sont
+maintenus à un potentiel $V=0$ et les contours de la cavité (en noir) à
+un potentiel constant $V(\theta)$ non nul.
+
+\begin{equation}
+    V(\theta) = 1 - \frac{\theta^2}{\theta_0^2}, \ \text{where } \theta_0=\frac{3\pi}{4}
+\end{equation}
+
+Dans ces conditions, le potentiel électrostatique $V$ est solution de l'équation
+de Laplace :
+
+\begin{equation}
+    \Delta V = 0
+\end{equation}
+
+\newpage
+
+\section{Modélisation par éléments finis}
+
+\subsection{Equation à résoudre}
+
+\hspace{0.5cm}
+On cherche à résoudre l'équation de Laplace sur un domaine $\Omega$ avec des
+conditions aux limites de Dirichlet sur le domaine $\Gamma_D$.
+
+On pose $u$ le potentiel électrostatique. On veut résoudre:
+
+\begin{equation}
+   \frac{\partial^2 u}{\partial x^2} + \frac{\partial^2 u}{\partial y^2} = 0
+\end{equation}
+
+On introduit les fonctions $v$ sur $\Omega$ le domaine de définition de $u$,
+notre potentiel, avec $v \in V = \{H^1(\Omega); v|_{\Gamma_D} = 0 \}$, où
+$H^1(\Omega)$ est l'espace de Hilbert des fonctions dérivables au sens des
+distributions et carrés intégrables sur $\Omega$.
+
+Pour appliquer la méthode des éléments finis, on utilise Green
+pour écrire:
+
+\begin{equation}
+    \int_\Omega \Delta u(x) v(x) dx = \int_\Omega \nabla u(x) \nabla v(x) dx
+    - \int_{\Gamma} \partial_n u(s) v(s) ds
+\end{equation}
+
+Par définition, les fonctions tests $v$ sont nulles sur le bord $\Gamma$. On a
+donc:
+
+\begin{equation}
+    \int_\Omega \nabla u(x) \nabla v(x) dx = 0
+    \label{eq:weak_form}
+\end{equation}
+
+L'équation \ref{eq:weak_form} est appelée la formulation
+faible de notre problème.
+
+Ainsi, on cherche $u$ telle que pour tout $v$ dans l'espace
+de Hilbert $H^1(\Omega)$, l'équation \ref{eq:weak_form} soit vérifiée.
+
+On peut réécrire cette équation sous la forme suivante:
+
+\begin{equation}
+    a(u, v) = 0
+\end{equation}
+
+On ajoute maintenant la condition de Dirichlet sur le bord $\Gamma_D$:
+
+\begin{equation}
+    u(x) = g(x), \hspace{0.2cm} \forall x \in \Gamma_D
+    \Leftrightarrow  u-g \in V
+\end{equation}
+
+Dès lors, on peut approcher le problème avec la solution 
+$u^h$ dans un espace de dimension finie $V^h$.
+
+On a donc:
+
+\begin{equation}
+    a(u^h, v^h) = 0
+\end{equation}
+
+On décompose $u^h$ et $v^h$ sur la base des fonctions chapeau
+$\{B^h_i\}^{i=N^h}_{i=1}$
+
+\begin{equation}
+    u^h = g^h + \sum_{i=1}^{N^h} x_i B^h_i
+    \ \text{ et } \ v^h = \sum_{i=1}^{N^h} y_i B^h_i
+\end{equation}
+
+Avec $x_i$ les inconnues du problème.
+
+On revient au problème équivalent suivant:
+
+\begin{equation}
+    a(u^h - g^h, v^h) = - a(g^h, v^h)
+\end{equation}
+
+On pose maintenant les coefficients $A_{ij} = a(B^h_j, B^h_i)$. Ainsi, on peut
+réécrire le problème sous forme matricielle:
+
+\begin{equation}
+    \sum_{i,j} y_i A_{i,j} x_j
+\end{equation}
+
+En posant $g_i = a(g^h, B^h_i)$, ce qui donne $a(g^h, v^h) = \sum_i y_i g_i$,
+on obtient le système linéaire suivant:
+
+\begin{equation}
+    \sum_{i,j} y_i A_{i,j} x_j = - \sum_i y_i g_i
+\end{equation}
+
+Que l'on peut réécrire sous forme matricielle en posant $b$ le vecteur colonne
+des $-g_i$ et $x$ le vecteur colonne des $x_i$:
+
+\begin{equation}
+    y^T \cdot A \cdot x =  y^T \cdot b
+\end{equation}
+
+Ce qui équivaut à résoudre:
+
+\begin{equation}
+    A \cdot x = b
+\end{equation}
+
+\subsection{Méthode des éléments finis}
+
+On doit maintenant assurer le raccord entre les différents éléments.
+Pour ce faire, on considère dorénavant les fonctions tests
+polynomiales $v \in X^h$.
+
+Dès lors, on montre que chaque fonction $v$
+est définie par les valeurs qu'elle prend
+sur les nœuds du maillage et on peut les écrire comme une combinaison
+linéaire des fonctions $B_i$, les fonctions chapeau généralisées.
+
+Ainsi, on assure directement la continuité de $v$ sur les éléments en
+ayant simplement les mêmes valeurs aux nœuds.
+
+
+\subsection{Maillage du domaine}
+
+\hspace{0.5cm}
+Nous allons discrétiser le domaine en éléments finis et résoudre le problème
+de Laplace par la méthode des éléments finis.
+
+La figure \ref{fig:pointe_ef} représente la discrétisation du domaine en éléments
+finis. Nous nous placerons en deux dimensions.
+
+\begin{figure}[h]
+    \centering
+    \hspace{1cm} \includegraphics[scale= 0.7]{img/pointe_ef.png}
+    \caption{Discretisation du domaine}
+    \label{fig:pointe_ef}
+\end{figure}
+
+On rappelle qu'on doit résoudre le problème suivant:
+
+\begin{equation}
+    \begin{cases}
+        u^h \in X^h, \hspace{0.3cm} u^h - g^h \in V^h \\
+        a(u^h, v^h) = 0, \hspace{0.3cm} \forall v^h \in V^h
+    \end{cases}   
+\end{equation}
+
+\subsubsection{Base des polynômes sur un élément}
+
+On réécrit le problème avec des sommes sur chaque élément $[e]$:
+
+\begin{equation}
+    a(u^h, v^h) = \sum_{T^{[e]} \in \mathcal{T}^h} \int_{T^{[e]}}
+    \sum_{i,j=1}^N a_{ij} \partial_j u ^{[e]} \partial_i v^{[e]} dT^{[e]}
+\end{equation}
+
+Nous allons maintenant avoir besoin de décomposer les fonctions $u$
+et $v$ sur une base de fonctions chapeau. Ces fonctions, propres
+à chaque élément [e], sont notées $B^{[e]}_1$, $B^{[e]}_2$ et
+$B^{[e]}_3$ et doivent nous permettre de définir n'importe
+quelle fonction polynomiale de degré 1 sur l'élément [e].
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.5]{img/element.png}
+    \caption{Un élément du maillage}
+    \label{fig:element}
+\end{figure}
+
+Pour un élément [e] (Figure \ref{fig:element}), on les définit
+comme par les propriétés suivantes:
+
+\begin{align}
+    B^{[e]}_1(x_1,y_1) = 1, \ B^{[e]}_1(x_1,y_2) = 0, \ B^{[e]}_1(x_2,y_1) = 0 \\
+    B^{[e]}_2(x_1,y_1) = 0, \ B^{[e]}_2(x_1,y_2) = 1, \ B^{[e]}_2(x_2,y_1) = 0 \\
+    B^{[e]}_3(x_1,y_1) = 0, \ B^{[e]}_3(x_1,y_2) = 0, \ B^{[e]}_3(x_2,y_1) = 1
+\end{align}
+
+Autrement dit, chaque fonction chapeau vaut 1 sur un nœud et 0
+sur les deux autres. On peut montrer qu'avec de telles propriétés,
+ces fonctions chapeaux définissent bien une base de l'espace des
+fonctions polynomiales de degré 1 sur l'élément [e].
+
+Dans cette base, on peut écrire $u^{[e]}$ et $v^{[e]}$ comme suit:
+
+\begin{align}
+    u^{[e]} = \sum_{i=1}^3 u_i^{[e]} B_i^{[e]}
+    = u_1^{[e]} B_1^{[e]} + u_2^{[e]} B_2^{[e]} + u_3^{[e]} B_3^{[e]} \\
+    v^{[e]} = \sum_{i=1}^3 v_i^{[e]} B_i^{[e]}
+    = v_1^{[e]} B_1^{[e]} + v_2^{[e]} B_2^{[e]} + v_3^{[e]} B_3^{[e]}
+\end{align}
+
+\subsubsection{Matrice de raideur partielle}
+
+On introduit la matrice de raideur partielle
+$K^{[e]}$ telle que pour un élément [e]:
+
+\begin{equation}
+    \int_{T^{[e]}} \sum_{i,j=1}^2 a_{ij} \partial_j u ^{[e]}
+     \partial_i v^{[e]} dT^{[e]} 
+     = \left[ v_1^{[e]}, v_2^{[e]},  v_3^{[e]} \right] \cdot K^{[e]}
+     \cdot \left[ u_1^{[e]}, u_2^{[e]}, u_3^{[e]} \right]^T
+    \label{eq:int_to_K}
+\end{equation}
+
+Si on considère un seul élément [e], on peut chercher à expliciter
+les termes de la matrice de raideur $K^{[e]}$.
+
+On réécrit le problème comme suit:
+
+\begin{equation}
+    \left[ v_1^{[e]}, v_2^{[e]},  v_3^{[e]} \right] K^{[e]}
+     \left[ u_1^{[e]}, u_2^{[e]}, u_3^{[e]} \right]^T
+     = \int_{T^{[e]}} \left[\partial_x v^{[e]},
+     \partial_y v^{[e]}\right] A^{[e]} \left[\partial_x u^{[e]},
+     \partial_y u^{[e]}\right]^T dT^{[e]}
+\end{equation}
+
+Avec $A^{[e]}$ la matrice des coefficients $a_{ij}$.
+
+Nous allons chercher à réécrire ce problème sous forme matricielle
+afin d'être capable de calculer les coefficients de $K^{[e]}$.
+De cette manière, nous serons capable d'avoir accès au terme
+de l'intégrale de l'équation \ref{eq:int_to_K}.
+
+En sélectionnant des polynômes de degré 1 sur un élément $T^{[e]}$,
+l'intégrale se réduit à la mesure de l'aire du triangle élémentaire
+noté $|T^{[e]}|$ et à moyenner les valeurs de $A^{[e]}$:
+
+\begin{equation}
+    \begin{bmatrix}
+        v_1^{[e]} & v_2^{[e]} &  v_3^{[e]}
+    \end{bmatrix}
+    K^{[e]}
+    \begin{bmatrix}
+        u_1^{[e]} \\ u_2^{[e]} \\ u_3^{[e]}
+    \end{bmatrix}
+     = |T^{[e]}| \cdot
+    \begin{bmatrix}
+        \partial_x v^{[e]} & \partial_y v^{[e]}
+    \end{bmatrix}
+    \overline{A^{[e]}}
+    \begin{bmatrix}
+        \partial_x u^{[e]} \\ \partial_y u^{[e]}
+    \end{bmatrix}
+    \label{eq:vKu_eq}
+\end{equation}
+
+\subsubsection{Réécriture sous forme matricielle}
+
+Puisque $u,v \in V^h$, on sait qu'on peut les écrire sous forme
+de polynômes de degré 1 en deux dimensions:
+
+\begin{align}
+    u^{[e]}(x,y) = \alpha_0^{[e]} + \alpha_1^{[e]} x + \alpha_2^{[e]} y
+    = \left[1 \ x \ y\right]
+    \left[ \alpha_0^{[e]} \ \alpha_1^{[e]} \ \alpha_2^{[e]} \right]^T \\
+    v^{[e]}(x,y) = \beta_0^{[e]} + \beta_1^{[e]} x + \beta_2^{[e]} y
+    = \left[1 \ x \ y\right]
+    \left[ \beta_0^{[e]} \ \beta_1^{[e]} \ \beta_2^{[e]} \right]^T
+\end{align}
+
+Puisqu'on cherche la décomposition de $u$ sur la 
+base des fonctions chapeau, on exprime les coefficients de $u$
+par rapport à cette base grâce aux sommets de l'élément
+sous la forme suivante:
+
+\vspace{0.5cm}
+
+\begin{minipage}{0.45\textwidth}
+    \begin{equation*}\begin{cases}
+        \alpha_0^{[e]} + \alpha_1^{[e]} x_1
+        + \alpha_2^{[e]} y_1 = u^{[e]}_1 \\
+        \alpha_0^{[e]} + \alpha_1^{[e]} x_2
+        + \alpha_2^{[e]} y_1 = u^{[e]}_2 \\
+        \alpha_0^{[e]} + \alpha_1^{[e]} x_1
+        + \alpha_2^{[e]} y_2 = u^{[e]}_3
+    \end{cases}\end{equation*}
+\end{minipage}
+\begin{minipage}{0.01\textwidth}
+    \centering
+    $\Leftrightarrow$
+\end{minipage}
+\begin{minipage}{0.45\textwidth}
+    
+    \begin{equation}
+        \hspace{-2cm} P^{[e]} \left[\alpha^{[e]}\right] = \left[u^{[e]}\right]
+        \label{eq:p_alpha_u}
+    \end{equation}
+\end{minipage}
+
+\vspace{5mm}
+
+Avec la matrice $P^{[e]}$ définie par:
+
+\begin{equation}
+    P^{[e]} = \begin{bmatrix}
+        1 & x_1 & y_1 \\
+        1 & x_2 & y_1 \\
+        1 & x_1 & y_2
+    \end{bmatrix}
+\end{equation}
+
+Par ailleurs, en dérivant les formes générales
+de $u$ et $v$, on peut écrire:
+
+\begin{align}
+    \begin{bmatrix}
+    \partial_x u^{[e]} \\ \partial_y u^{[e]}
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+    0 & 1 & 0 \\
+    0 & 0 & 1
+    \end{bmatrix}
+    \begin{bmatrix}
+    \alpha_0^{[e]} \\ \alpha_1^{[e]} \\ \alpha_2^{[e]}
+    \end{bmatrix} \\
+    \begin{bmatrix}
+    \partial_x v^{[e]} \\ \partial_y v^{[e]}
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+    0 & 1 & 0 \\
+    0 & 0 & 1
+    \end{bmatrix}
+    \begin{bmatrix}
+    \beta_0^{[e]} \\ \beta_1^{[e]} \\ \beta_2^{[e]}
+    \end{bmatrix}
+\end{align}
+
+On pose alors la matrice $D =
+\begin{bmatrix}
+    0 & 1 & 0 \\
+    0 & 0 & 1
+\end{bmatrix} $
+qui nous permet de dériver simplement les fonctions $u$ et $v$.
+On pose les vecteurs suivants:
+
+\begin{equation}
+    \begin{bmatrix}
+        \partial_x u^{[e]} \\ \partial_y u^{[e]}
+    \end{bmatrix}
+    =
+    \left[ \partial u^{[e]} \right]
+    \text{ et }
+    \begin{bmatrix}
+        \partial_x v^{[e]} \\ \partial_y v^{[e]}
+    \end{bmatrix}
+    =
+    \left[ \partial v^{[e]} \right]
+\end{equation}
+
+\begin{equation}
+    \begin{bmatrix}
+        \beta_0^{[e]} \\ \beta_1^{[e]} \\ \beta_2^{[e]}
+    \end{bmatrix}
+    = \left[ \beta^{[e]} \right]
+    \text{ et }
+    \begin{bmatrix}
+        \alpha_0^{[e]} \\ \alpha_1^{[e]} \\ \alpha_2^{[e]}
+    \end{bmatrix}
+    = \left[ \alpha^{[e]} \right]
+\end{equation}
+
+\begin{equation}
+    \begin{bmatrix}
+        u_1^{[e]} \\ u_2^{[e]} \\ u_3^{[e]}
+    \end{bmatrix}
+    = \left[ u^{[e]} \right]
+    \text{ et }
+    \begin{bmatrix}
+        v_1^{[e]} \\ v_2^{[e]} \\ v_3^{[e]}
+    \end{bmatrix}
+    = \left[ v^{[e]} \right]
+\end{equation}
+
+Avec ces nouvelles matrices, muni de l'équation
+\ref{eq:p_alpha_u} et de l'équation \ref{eq:vKu_eq} que l'on réécrit
+comme suit:
+
+\begin{equation}
+    \left[ v^{[e]} \right]^T K^{[e]} \left[ u^{[e]} \right]
+    =
+    |T^{[e]}| \left[ \partial v^{[e]} \right]
+    \overline{A^{[e]}} \left[ \partial u^{[e]} \right]
+\end{equation}
+
+On peut alors réécrire le problème sous forme matricielle:
+
+\vspace{0.4cm}
+
+\begin{equation}
+    \left[ v \right]^T K^{[e]} \left[ u \right]
+    =
+    |T^{[e]}| \left[ \partial v \right]^T \overline{A^{[e]}}
+    \left[ \partial u \right]
+\end{equation}
+
+\vspace{-0.3cm}
+
+\begin{center} $\Leftrightarrow$ \end{center}
+
+\vspace{-0.6cm}
+
+\begin{equation}
+    \left(P^{[e]}\left[\beta^{[e]}\right] \right)^T K^{[e]}
+    P^{[e]}\left[\alpha^{[e]}\right] = |T^{[e]}|
+    \left(D\left[\beta^{[e]}\right]\right)^T
+    \overline{A^{[e]}} D\left[\alpha^{[e]}\right]
+\end{equation}
+
+\vspace{0.4cm}
+
+En passant les termes à droite, en simplifiant les
+matrices $\left[\alpha\right]$ et $\left[\beta\right]$ par
+la droite et la gauche, et en écrivant
+$H^{[e]} = \left( P^{[e]}\right)^{-1}$, on obtient:
+
+\begin{equation}
+    K^{[e]} = \left(H^{[e]}\right)^T D^T
+    \left( |T| \overline{A^{[e]}} \right) D H^{[e]}
+\end{equation}
+
+Notez qu'ici, $D$ est de taille 2x3, $\overline{A^{[e]}}$
+de taille 2x2 et $H^{[e]}$ de taille 3x3.
+
+\subsubsection{Expression des matrices dans le cadre du problème}
+
+En pratique, avec notre problème, nous savons que:
+
+\begin{equation}
+    \overline{A^{[e]}} =
+    \begin{bmatrix}
+        1 & 0 \\ 0 & 1
+    \end{bmatrix}
+\end{equation}
+
+Car, rappelons-le, notre formulation faible d'origine est
+
+\begin{equation}
+    \int_\Omega \nabla u(x) \nabla v(x) dx = 0
+\end{equation}
+
+Nous avons maintenant besoin de connaître la matrice $H^{[e]}$
+et la valeur de $|T|$.
+
+Notons $h$ la longueur d'un côté de l'élément [e]. On a donc
+$h = x_2 - x_1 = y_2 - y_1$. Dès lors,
+
+\begin{equation}
+    |T| = \frac{1}{2} h^2
+\end{equation}
+
+
+Par ailleurs, on peut inverser la matrice $P^{[e]}$ pour obtenir
+la matrice $H^{[e]}$. Par calcul, on trouve:
+
+\begin{equation}
+    H^{[e]} = \frac{1}{h^2}
+    \begin{bmatrix}
+        x_2 y_2 - x_1 y_1 & -hx_1 & -hy_1 \\
+        -h & h & 0 \\
+        -h & 0 & h
+    \end{bmatrix}
+\end{equation}
+
+
+\end{document}

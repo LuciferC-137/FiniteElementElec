@@ -1,8 +1,9 @@
+import os
+from matplotlib import pyplot as plt
 import numpy as np
 from elements import Mesh, MeshBuilder
 from plotting import Plotter
 from solver import Solver
-from logger import Logger
 
 # --------------------------- PARAMETERS ---------------------------
 
@@ -35,9 +36,16 @@ u = solver.solve_mesh()
 
 # Computing the continuous solution
 z = solver.compute_continous_solutions(mesh, u, res=200)
+
 e = solver.compute_element_gradients(mesh, u)
 
 # Plotting
-Plotter.plot_mesh_circle_boundary(mesh)
-Plotter.plot_continous(mesh, z)
-Plotter.plot_discontinuous_field(mesh, e)
+fig, ((ax0, ax1), (ax2, ax3)) = plt.subplots(2, 2)
+Plotter.plot_mesh_circle_boundary(mesh, ax = ax0)
+Plotter.plot_mesh_all_elements(mesh, ax = ax1)
+Plotter.plot_continous(mesh, z, ax = ax2)
+Plotter.plot_discontinuous_field(mesh, e, ax = ax3)
+
+
+plt.show()
+Plotter.savefig(fig, 'image')

@@ -303,7 +303,7 @@ class MeshBuilder:
             n: int
                 The number of nodes on the circumference of the circle.
             L: float
-                Diamater of the circle.
+                Diameter of the circle.
 
         Returns
         -------

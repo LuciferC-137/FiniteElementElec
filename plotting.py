@@ -1,18 +1,54 @@
+import os
+import sys
 import numpy as np
-from logger import Logger
-from elements import CircularMesh, Element, Mesh, SquareMesh, Node
-import matplotlib.pyplot as plt
+import functools
 from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 from matplotlib.widgets import Slider, Button
 import matplotlib.tri as tri
 
-YELLOW = '\033[93m'
-GREEN = '\033[92m'
-RED = '\033[91m'
-RESET = '\033[0m'
+from logger import Logger
+from elements import CircularMesh, Element, Mesh, SquareMesh, Node
+import matplotlib.pyplot as plt
+
+
+def auto_axes(func):
+    """
+    This decorator does the following if the parameter 'ax' is None:
+        - Create a figure and an axes
+        - Assign ax to this new axes
+        - Show the plot at the tail of the function
+    Warning, the parameter 'ax' must be defined in the decorated method
+    """
+    @functools.wraps(func)
+    def wrapper(*args, ax: Axes = None, **kwargs):
+        show = ax is None
+        if show:
+            fig, ax = plt.subplots()
+        result = func(*args, ax=ax, **kwargs)
+        if show:
+            plt.show()
+        return result
+    return wrapper
 
 
 class Plotter:
+
+    @staticmethod
+    def savefig(fig: Figure, name: str) -> None:
+        """
+        Method to save the current figure to the directory 'output'.
+        Any previous png picture with the same name will be overridden.
+
+        Parameters
+        ----------
+            fig: matplotlib.figure.Figure
+                The figure to save
+            name: str
+                The name of the future picture file
+        """
+        fig.savefig(os.path.join(sys.path[0], 'output', name + '.png'),
+                    dpi=1000, bbox_inches='tight', transparent=True)
 
     @staticmethod
     def _ask_for_continue(mesh: Mesh):
@@ -149,7 +185,6 @@ class Plotter:
     
         """
         fig, ax = plt.subplots()
-        ax : Axes
         plt.subplots_adjust(bottom=0.25)
         
         n = mesh.n
@@ -206,10 +241,11 @@ class Plotter:
         btn_prev.on_clicked(prev_iteration)
         btn_next.on_clicked(next_iteration)
         btn_auto.on_clicked(toggle_auto)
-
         plt.show()
-    
-    def plot_mesh_all_elements(mesh: Mesh):
+
+    @auto_axes
+    @staticmethod
+    def plot_mesh_all_elements(mesh: Mesh, ax: Axes = None):
         """
         Method to plot the mesh with all elements highlighted in blue.
         
@@ -217,21 +253,26 @@ class Plotter:
         ----------
             mesh : Mesh
                 The mesh to be plotted.
+            ax : matplotlib.axes.Axes
+                The axes to plot on. If not given, created and shown
+                automatically
         """
         Plotter._ask_for_continue(mesh)
-        fig, ax = plt.subplots()
-        ax : Axes
         for element in mesh.elements.values():
             Plotter._plot_element(element, ax, "red")
         for node in mesh:
             Plotter._plot_node_and_links(node, ax)
-        plt.show()
+        ax.axis("equal")
+        ax.get_figure().tight_layout()
+        ax.set_title("Element of the mesh")
 
+    @auto_axes
     @staticmethod
     def plot_mesh_square_boundary(mesh: SquareMesh, color_mesh: str = "blue",
                                       color_peak: str = "green",
                                       color_bound: str = "red",
-                                      color_central_node: str = "yellow"):
+                                      color_central_node: str = "yellow",
+                                      ax: Axes = None):
         """
         Method to plot the mesh with all nodes inside the peak highlighted in
         "color_peak" and the nodes of the external boundary in "color_bound".
@@ -249,14 +290,14 @@ class Plotter:
                 The color of the boundary nodes. Default: "red"
             color_central_node : str
                 The color of the central node. Default: "yellow"
-
+            ax : matplotlib.axes.Axes
+                The axes to plot on. If not given, created and shown
+                automatically
         """
         if not (isinstance(mesh, SquareMesh)):
             Logger().raise_error("The mesh must be a SquareMesh object when"
                                  " using 'plot_mesh_square_boudary'.")
         Plotter._ask_for_continue(mesh)
-        fig, ax = plt.subplots()
-        ax : Axes
         n = mesh.n
         # Plot blue lines in the background with lower z-order
         for node in mesh:
@@ -278,13 +319,14 @@ class Plotter:
         # Plot a yellow nodes for peak node
         ax.scatter(mesh.peak_node.x, mesh.peak_node.y,
                    color=color_central_node, zorder=3)
-        plt.show()
 
+    @auto_axes
     @staticmethod
     def plot_mesh_circle_boundary(mesh: CircularMesh, color_mesh: str = "blue",
                                       color_peak: str = "green",
                                       color_bound: str = "red",
-                                      color_central_node: str = "yellow"):
+                                      color_central_node: str = "yellow",
+                                      ax: Axes = None):
         """
         Method to plot the mesh with all nodes inside the peak highlighted in
         "color_peak" and the nodes of the external boundary in "color_bound".
@@ -302,13 +344,17 @@ class Plotter:
                 The color of the boundary nodes. Default: "red"
             color_central_node : str
                 The color of the central node. Default: "yellow"
-
+            ax : matplotlib.axes.Axes
+                The axes to plot on. If not given, created and shown
+                automatically
         """
         if not (isinstance(mesh, CircularMesh)):
             Logger().raise_error("The mesh must be a CircularMesh object when"
                                  " using 'plot_mesh_square_boudary'.")
         Plotter._ask_for_continue(mesh)
-        fig, ax = plt.subplots()
+        show = ax is None
+        if show:
+            fig, ax = plt.subplots()
         ax : Axes
         # Plot blue lines in the background with lower z-order
         for node in mesh:
@@ -330,11 +376,16 @@ class Plotter:
         # Plot a yellow nodes for peak node
         ax.scatter(mesh[0].x, mesh[0].y,
                    color=color_central_node, zorder=3)
-        plt.show()
+        ax.get_figure().tight_layout()
+        ax.axis("equal")
+        ax.set_title("Boundary conditions over the mesh")
+        if show:
+            plt.show()
 
+    @auto_axes
     @staticmethod
     def plot_potential(mesh: SquareMesh, u: np.ndarray,
-                       cmap: str = 'viridis') -> None:
+                       cmap: str = 'viridis', ax: Axes = None) -> None:
         """
         Method to plot the potential distribution in the mesh according
         to the result array. Only nodal values are plotted.
@@ -348,26 +399,29 @@ class Plotter:
                 (dimension: n_nodes)
             cmap : str
                 The colormap to be used. Default: 'viridis'
-
+            ax : matplotlib.axes.Axes
+                The axes to plot on. If not given, created and shown
+                automatically
         """
         if not isinstance(mesh, SquareMesh):
             Logger().raise_error("The mesh must be a SquareMesh object when"
                                  " using 'plot_potential'.")
+        
         x = np.array([node.x for node in mesh])
         y = np.array([node.y for node in mesh])
         z = u.reshape((mesh.n, mesh.n))
-        plt.figure()
-        plt.imshow(z, extent=(x.min(), x.max(), y.min(), y.max()),
+        ax.imshow(z, extent=(x.min(), x.max(), y.min(), y.max()),
                    origin='lower', cmap=cmap)
-        plt.colorbar(label='Potential')
-        plt.xlabel('x')
-        plt.ylabel('y')
-        plt.title('Potential Distribution')
-        plt.show()
+        ax.get_figure().colorbar(label='Potential')
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        ax.set_title('Potential Distribution')
+        ax.axis("equal")
 
+    @auto_axes
     @staticmethod
     def plot_electric_field(mesh: SquareMesh, u: np.ndarray,
-                            cmap: str = 'viridis') -> None:
+                            cmap: str = 'viridis', ax: Axes = None) -> None:
         """
         Method to plot the electric field distribution in the mesh according
         to the result array. The field is calculated by computing
@@ -383,7 +437,9 @@ class Plotter:
                 (dimension: n_nodes)
             cmap : str
                 The colormap to be used. Default: 'viridis'
-
+            ax : matplotlib.axes.Axes
+                The axes to plot on. If not given, created and shown
+                automatically
         """
         if not isinstance(mesh, SquareMesh):
             Logger().raise_error("The mesh must be a SquareMesh object when"
@@ -395,18 +451,20 @@ class Plotter:
         dx, dy = np.gradient(z)
         magnitude = np.sqrt(dx**2 + dy**2)
 
-        plt.figure()
-        plt.imshow(magnitude, extent=(x.min(), x.max(), y.min(), y.max()),
+        ax.imshow(magnitude, extent=(x.min(), x.max(), y.min(), y.max()),
                 origin='lower', cmap=cmap)
-        plt.colorbar(label='Electric Field Intensity')
-        plt.xlabel('x')
-        plt.ylabel('y')
-        plt.title('Electric Field')
-        plt.show()
-    
+        ax.get_figure().colorbar(label='Electric Field Intensity')
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        ax.set_title('Electric Field')
+        ax.axis("equal")
+        ax.get_figure().tight_layout()
+
+    @auto_axes
+    @staticmethod
     def plot_continous(mesh: Mesh, z: np.ndarray,
-                                  cmap: str = 'viridis',
-                                  margin: float = 0.05) -> None:
+                       cmap: str = 'viridis',
+                       margin: float = 0.05, ax: Axes = None) -> None:
         """
         Method to plot the potential distribution in the mesh and compute 
         the intermediate values for an image of 'res' pixels in length.
@@ -421,9 +479,13 @@ class Plotter:
                 The colormap to be used. Default: 'viridis'
             res : int
                 The resolution of one side of the image (in pixels)
-
+            margin : float
+                The margin to the border. If it's given, it must match the
+                margin defined when creating the z array.
+            ax : matplotlib.axes.Axes
+                The axes to plot on. If not given, created and shown
+                automatically
         """
-        
         x = np.array([node.x for node in mesh])
         y = np.array([node.y for node in mesh])      
         
@@ -436,18 +498,35 @@ class Plotter:
         y_min -= margin
         y_max += margin
         
-        plt.figure(figsize=(10, 8))
-        plt.imshow(z, extent=[x_min, x_max, y_min, y_max], origin='lower', 
+        im = ax.imshow(z, extent=[x_min, x_max, y_min, y_max], origin='lower', 
                 cmap=cmap, interpolation='bilinear')
-        plt.colorbar(label='Potential')
-        plt.xlabel('x')
-        plt.ylabel('y')
-        plt.title('Continous potential over the mesh')
-        plt.tight_layout()
-        plt.show()
+        ax.get_figure().colorbar(im, label='Potential')
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        ax.set_title('Continous potential over the mesh')
+        ax.axis("equal")
+        ax.get_figure().tight_layout()
 
+    @auto_axes
+    @staticmethod
     def plot_discontinuous_field(mesh: Mesh, e: np.ndarray,
-                                 cmap: str ='viridis'):
+                                 cmap: str ='viridis', ax: Axes = None):
+        """
+        Method to plot the potential distribution in the mesh and compute 
+        the intermediate values for an image of 'res' pixels in length.
+
+        Parameters
+        ----------
+            mesh : Mesh
+                The mesh object.
+            e : np.ndarray[float]
+                The array with the electric field values
+            cmap : str
+                The colormap to be used. Default: 'viridis'
+            ax : matplotlib.axes.Axes
+                The axes to plot on. If not given, created and shown
+                automatically
+        """
         x = np.array([node.x for node in mesh])
         y = np.array([node.y for node in mesh])
 
@@ -464,14 +543,12 @@ class Plotter:
 
         triang = tri.Triangulation(x, y, triangles)
 
-        plt.figure(figsize=(10, 8))
         # 'flat' shading -> one value per triangle
-        tpc = plt.tripcolor(triang, facecolors=E_values, cmap=cmap,
+        tpc = ax.tripcolor(triang, facecolors=E_values, cmap=cmap,
                             shading='flat', edgecolors='k', linewidth=0.2)
-        plt.colorbar(tpc, label='|E| Electric field intensity')
-        plt.title("Electric field |∇V|")
-        plt.xlabel("x")
-        plt.ylabel("y")
-        plt.axis("equal")
-        plt.tight_layout()
-        plt.show()
+        ax.get_figure().colorbar(tpc, label='|E| Electric field intensity')
+        ax.set_title("Electric field |∇V|")
+        ax.set_xlabel("x")
+        ax.set_ylabel("y")
+        ax.axis("equal")
+        ax.get_figure().tight_layout()
