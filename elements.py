@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Iterator
 import numpy as np
 from math import pi, cos, sin, floor
+from logger import Logger
 
 RED = '\033[91m'
 RESET = '\033[0m'
@@ -91,6 +92,7 @@ class Mesh(ABC):
         self._n = n
         self._nodes : dict[Node] = nodes
         self._elements : dict[Element] = {}
+        self._logger = Logger()
     
     def __getitem__(self, key) -> Node:
         return self._nodes[key]
@@ -115,8 +117,12 @@ class Mesh(ABC):
     def build_elements(self):
         self._elements = {}
         element_index = 0
+        i = 0
         for node1_index, node1 in self._nodes.items():
             for node2_index, node2 in self._nodes.items():
+                self._logger.log_prc("Building Elements",
+                                     i, len(self._nodes)*len(self._nodes))
+                i += 1
                 node1 : Node
                 node2 : Node
                 if node2_index <= node1_index:
@@ -133,6 +139,7 @@ class Mesh(ABC):
                     element = Element(node1, node2, node3)
                     self._elements[element_index] = element
                     element_index += 1
+        self._logger.log_prc_done("Building Elements")
         if not self._elements:
             raise ValueError(f"{RED}No element could be created."
                              f"Check the nodes connectivity.{RESET}")
@@ -230,7 +237,7 @@ class CircularMesh(Mesh):
 
 class MeshBuilder:
     def __init__(self):
-        pass
+        self._logger = Logger()
 
     def build_square_mesh(self, n: int, L: float) -> SquareMesh:
         """
@@ -316,24 +323,32 @@ class MeshBuilder:
 
         current_index = 1
         layer_radius = r / n_layers
-
+        p = 0
         for k in range(1, n_layers + 1):
             num_points = 6 * k
             angle_step = 2 * pi / num_points
             r = layer_radius * k
             for i in range(num_points):
+                self._logger.log_prc("Building Circular Mesh",
+                                     p, n_layers * (n_layers + 1) * 3)
+                p += 1
                 theta = i * angle_step
                 x = r * cos(theta)
                 y = r * sin(theta)
                 node = Node(x, y, index = current_index)
                 nodes[current_index] = node
                 current_index += 1
+        self._logger.log_prc_done("Building Circular Mesh")
         return nodes
     
     def _index_circular_neighbors(self, mesh: CircularMesh):
+        i = 0
         for node in mesh:
             closest_nodes = []
             for neighbor in mesh:
+                self._logger.log_prc("Indexing Circular Mesh",
+                                     i, mesh.size() * mesh.size())
+                i += 1
                 if node != neighbor:
                     distance = node.distance(neighbor)
                     closest_nodes.append((neighbor, distance))
@@ -347,3 +362,4 @@ class MeshBuilder:
 
             node.neighbors = [neighbor for neighbor,
                                _ in closest_nodes[:number_of_neighbors]]
+        self._logger.log_prc_done("Indexing Circular Mesh")

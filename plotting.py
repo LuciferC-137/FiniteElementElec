@@ -1,4 +1,5 @@
 import numpy as np
+import time
 from elements import CircularMesh, Element, Mesh, SquareMesh, Node
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
@@ -6,9 +7,9 @@ from matplotlib.widgets import Slider, Button
 import matplotlib.tri as tri
 
 YELLOW = '\033[93m'
+GREEN = '\033[92m'
 RED = '\033[91m'
 RESET = '\033[0m'
-
 
 
 class Plotter:

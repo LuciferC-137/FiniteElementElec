@@ -1,5 +1,6 @@
 import numpy as np
 from elements import Mesh, Element, Node
+from logger import Logger
 
 RED = '\033[91m'
 RESET = '\033[0m'
@@ -7,6 +8,7 @@ RESET = '\033[0m'
 class Solver:
     def __init__(self, mesh: Mesh = None):
         self._mesh = mesh
+        self._logger = Logger()
     
     def set_mesh(self, mesh: Mesh):
         self._mesh = mesh
@@ -46,19 +48,18 @@ class Solver:
         self._check_mesh_or_abort()
         n_nodes = self._mesh.size()
         K = np.zeros((n_nodes, n_nodes))
-        prc, i = 0, 0
+        i = 0
         for element in self._mesh.iter_elements():
             # Printing progression
             element : Element
-            i+=1
-            new_prc = int(100 * (i / len(self._mesh.elements)))
-            if new_prc != prc:
-                prc = new_prc
-                print(f"Computing Matrix: {prc:3d}%       ", end='\r')
+            self._logger.log_prc("Computing rigidity matrix", i,
+                                 len(self._mesh.elements))
+            i += 1
             Ke = self.compute_element_stiffness_matrix(element)
             for i_local, node_i in enumerate(element.nodes):
                 for j_local, node_j in enumerate(element.nodes):
                     K[node_i.index, node_j.index] += Ke[i_local, j_local]
+        self._logger.log_prc_done("Computing rigidity matrix")
         return K
     
     def _apply_boundary_conditions(self, K: np.ndarray, F: np.ndarray,
@@ -112,7 +113,6 @@ class Solver:
                        [1, x[2], y[2]]])
         Ae = np.array([[1, 0], [0, 1]])
         He = np.linalg.inv(Pe)
-        h = 1 / 30
         Te = 0.5 * np.abs(np.linalg.det(Pe))
         D = np.array([[0, 1, 0], [0, 0, 1]])
         DT = np.array([[0, 0], [1, 0], [0, 1]])
@@ -144,15 +144,10 @@ class Solver:
 
         z = np.zeros_like(X)
         
-        prc = 0
         for i in range(res):
             for j in range(res):
-                new_prc = int(100 * (i * res + j) / (res * res))
-                if new_prc != prc:
-                    prc = new_prc
-                    print("Computing continuous solutions: "
-                        f"{prc:3d}%           ", end='\r')
-                
+                Logger().log_prc("Computing continuous solutions",
+                                 i * res + j, res * res)
                 pixel_x, pixel_y = X[i, j], Y[i, j]
                 found = False
                 
@@ -183,6 +178,7 @@ class Solver:
                 
                 if not found:
                     z[i, j] = np.nan
+        Logger().log_prc_done("Computing continuous solutions")
         return z
     
     @staticmethod
