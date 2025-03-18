@@ -213,20 +213,18 @@ On rappelle qu'on doit résoudre le problème suivant:
     \end{cases}   
 \end{equation}
 
-\subsubsection{Base des polynômes sur un élément}
+\subsection{Décomposition des polynômes sur un élément}
 
 On réécrit le problème avec des sommes sur chaque élément $[e]$:
 
 \begin{equation}
     a(u^h, v^h) = \sum_{T^{[e]} \in \mathcal{T}^h} \int_{T^{[e]}}
     \sum_{i,j=1}^N a_{ij} \partial_j u ^{[e]} \partial_i v^{[e]} dT^{[e]}
+    \label{eq:general_problem}
 \end{equation}
 
-Nous allons maintenant avoir besoin de décomposer les fonctions $u$
-et $v$ sur une base de fonctions chapeau. Ces fonctions, propres
-à chaque élément [e], sont notées $B^{[e]}_1$, $B^{[e]}_2$ et
-$B^{[e]}_3$ et doivent nous permettre de définir n'importe
-quelle fonction polynomiale de degré 1 sur l'élément [e].
+Chaque élément $T^{[e]}$ est défini par trois
+nœuds (Figure \ref{fig:element}).
 
 \begin{figure}[h]
     \centering
@@ -235,30 +233,16 @@ quelle fonction polynomiale de degré 1 sur l'élément [e].
     \label{fig:element}
 \end{figure}
 
-Pour un élément [e] (Figure \ref{fig:element}), on les définit
-comme par les propriétés suivantes:
+Dans la suite, l'idée sera de décomposer les polynômes
+sur chaque élément et de réécrire le problème sous forme
+matricielle.
 
-\begin{align}
-    B^{[e]}_1(x_1,y_1) = 1, \ B^{[e]}_1(x_1,y_2) = 0, \ B^{[e]}_1(x_2,y_1) = 0 \\
-    B^{[e]}_2(x_1,y_1) = 0, \ B^{[e]}_2(x_1,y_2) = 1, \ B^{[e]}_2(x_2,y_1) = 0 \\
-    B^{[e]}_3(x_1,y_1) = 0, \ B^{[e]}_3(x_1,y_2) = 0, \ B^{[e]}_3(x_2,y_1) = 1
-\end{align}
+Pour ce faire, on note simplement $u^{[e]}$ et $v^{[e]}$
+les fonctions $u$ et $v$ sur l'élément $T^{[e]}$, ainsi que
+$u^{[e]}_i$ et $v^{[e]}_i$ les valeurs de $u^{[e]}$ et $v^{[e]}$
+au nœud $i$ de l'élément $T^{[e]}$.
 
-Autrement dit, chaque fonction chapeau vaut 1 sur un nœud et 0
-sur les deux autres. On peut montrer qu'avec de telles propriétés,
-ces fonctions chapeaux définissent bien une base de l'espace des
-fonctions polynomiales de degré 1 sur l'élément [e].
-
-Dans cette base, on peut écrire $u^{[e]}$ et $v^{[e]}$ comme suit:
-
-\begin{align}
-    u^{[e]} = \sum_{i=1}^3 u_i^{[e]} B_i^{[e]}
-    = u_1^{[e]} B_1^{[e]} + u_2^{[e]} B_2^{[e]} + u_3^{[e]} B_3^{[e]} \\
-    v^{[e]} = \sum_{i=1}^3 v_i^{[e]} B_i^{[e]}
-    = v_1^{[e]} B_1^{[e]} + v_2^{[e]} B_2^{[e]} + v_3^{[e]} B_3^{[e]}
-\end{align}
-
-\subsubsection{Matrice de raideur partielle}
+\subsection{Matrice de raideur partielle}
 
 On introduit la matrice de raideur partielle
 $K^{[e]}$ telle que pour un élément [e]:
@@ -314,7 +298,7 @@ noté $|T^{[e]}|$ et à moyenner les valeurs de $A^{[e]}$:
     \label{eq:vKu_eq}
 \end{equation}
 
-\subsubsection{Réécriture sous forme matricielle}
+\subsection{Réécriture sous forme matricielle}
 
 Puisque $u,v \in V^h$, on sait qu'on peut les écrire sous forme
 de polynômes de degré 1 en deux dimensions:
@@ -340,9 +324,9 @@ sous la forme suivante:
         \alpha_0^{[e]} + \alpha_1^{[e]} x_1
         + \alpha_2^{[e]} y_1 = u^{[e]}_1 \\
         \alpha_0^{[e]} + \alpha_1^{[e]} x_2
-        + \alpha_2^{[e]} y_1 = u^{[e]}_2 \\
-        \alpha_0^{[e]} + \alpha_1^{[e]} x_1
-        + \alpha_2^{[e]} y_2 = u^{[e]}_3
+        + \alpha_2^{[e]} y_2 = u^{[e]}_2 \\
+        \alpha_0^{[e]} + \alpha_1^{[e]} x_3
+        + \alpha_2^{[e]} y_3 = u^{[e]}_3
     \end{cases}\end{equation*}
 \end{minipage}
 \begin{minipage}{0.01\textwidth}
@@ -364,8 +348,8 @@ Avec la matrice $P^{[e]}$ définie par:
 \begin{equation}
     P^{[e]} = \begin{bmatrix}
         1 & x_1 & y_1 \\
-        1 & x_2 & y_1 \\
-        1 & x_1 & y_2
+        1 & x_2 & y_2 \\
+        1 & x_3 & y_3
     \end{bmatrix}
 \end{equation}
 
@@ -493,7 +477,7 @@ $H^{[e]} = \left( P^{[e]}\right)^{-1}$, on obtient:
 Notez qu'ici, $D$ est de taille 2x3, $\overline{A^{[e]}}$
 de taille 2x2 et $H^{[e]}$ de taille 3x3.
 
-\subsubsection{Expression des matrices dans le cadre du problème}
+\subsection{Expression des matrices dans le cadre du problème}
 
 En pratique, avec notre problème, nous savons que:
 
@@ -533,5 +517,109 @@ la matrice $H^{[e]}$. Par calcul, on trouve:
     \end{bmatrix}
 \end{equation}
 
+Ces simplifications pourraient être faites dans notre code pour
+accélérer les calculs, mais en pratique, on constate que le temps de
+calcul est principalement occupé par la reconstruction des valeurs
+en chaque point du plan (x, y) (pour une certaine résolution donnée)
+plutôt que par la résolution elle-même.
+
+Nous avons donc choisi de garder dans notre solveur une forme générale
+du problème telle que présentée à la section précédente.
+(La forme de la matrice $A^{[e]}$ est cependant conservée égale à l'identité,
+car cette matrice dépend du problème physique et non de la géométrie.)
+
+Ceci nous permet, comme nous le verrons dans la suite,
+d'adopter au besoin de nouvelles géométries.
+
+\subsection{Assemblage}
+
+Maintenant dotés des matrices de rigité élémentaires $K^{[e]}$
+sur chaque élément, l'équation \ref{eq:general_problem} nous permet
+de connaitre les coefficients de $K$, la matrice de rigitité globale
+du problème.
+
+En effet, on a la correspondance suivante:
+
+\begin{equation}
+    \begin{bmatrix}
+        v^h_1 & \cdots & v^h_N
+    \end{bmatrix}
+    K
+    \begin{bmatrix}
+        u^h_1 \\ \vdots \\ u^h_N
+    \end{bmatrix}
+    = \sum_{T^{[e]} \in \mathcal{T}^h}
+    \begin{bmatrix}
+        v^{[e]}_1 & v^{[e]}_2 & v^{[e]}_3
+    \end{bmatrix}
+    K^{[e]}
+    \begin{bmatrix}
+        u^{[e]}_1 \\ u^{[e]}_2 \\ u^{[e]}_3
+    \end{bmatrix}
+    \label{eq:assemblage}
+\end{equation}
+
+Ce que nous dit cette équation, c'est que pour chaque nœud,
+la valeur de K est la somme de toutes les valeurs de $K^{[e]}$
+correspondantes à ce nœud. En effet, chaque élément [e] est
+défini par trois nœuds, et chaque nœud est partagé par trois
+éléments, donc une matrice $K^{[e]}$ contient
+plusieurs fois les contributions de chaque nœud.
+
+\subsection{Conditions limites}
+
+Il ne reste plus qu'à définir les conditions limites de notre système.
+
+Si aucune contrainte n'existait, le système à résoudre serait:
+
+\begin{equation}
+    K \left[u^h\right]^T = \left[0\right]
+\end{equation}
+
+Mais certaines contributions doivent être retirées de la matrice K.
+En effet, il ne faut pas calculer les variations du nœud $i$ lorsque
+celui-ci est sur le bord, donc les contributions des autres nœud
+à la valeur en $i$ doivent être éliminées. Pour ce faire, il suffit
+de fixer à $0$ la colonne $i$ de la matrice $K$
+(sauf la valeur en $(i, i)$, ainsi le nœud $i$ sera le seul à contribuer
+à sa propre valeur, et on élimine la variation) et définir une valeur
+fixe dans le second membre à la place de $0$.
+
+Admettons dans l'exemple suivant que le nœud $i$ se trouve au bord et
+est fixée à la valeur $U_i$
+Voici les modifications à apporter à la matrice:
+
+\begin{equation}
+    \begin{bmatrix}
+        K_{1,1} & \cdots & K_{i,1} = 0 & \cdots & K_{1,N} \\
+        \vdots & \ddots & \vdots & \ddots & \vdots \\
+        \vdots & \ddots & K_{i,i} = 1 & \ddots & \vdots \\
+        \vdots & \ddots & \vdots & \ddots & \vdots \\
+        K_{N,1} & \cdots & K_{i,N}=0 & \cdots & K_{N,N}
+    \end{bmatrix}
+    \begin{bmatrix}
+        u^h_1 \\ \vdots \\ u^h_N
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        0 \\ \vdots \\ U_i \\ \vdots \\ 0
+    \end{bmatrix}
+\end{equation}
+
+En nottant le membre de droite $F$ et $K^*$ la nouvelle
+matrice de rigitité prenant en compte les conditions aux limites,
+il en découle simplement un système linéaire à résoudre:
+
+\begin{equation}
+    K^*
+    \begin{bmatrix}
+        u^h_1 \\ \vdots \\ u^h_N
+    \end{bmatrix}
+    = F
+\end{equation}
+
+Et c'est bien ce calcul qui sera réalisé dans notre code.
+
+\section{Présentation du code}
 
 \end{document}

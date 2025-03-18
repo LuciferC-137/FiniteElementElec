@@ -153,7 +153,6 @@ INPUT ./img/pointe_ef.png
 INPUT ./img/pointe_ef.png
 INPUT ./img/pointe_ef.png
 INPUT ./img/pointe_ef.png
-INPUT d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/tfm/public/cm/cmbx10.tfm
 INPUT ./img/element.png
 INPUT ./img/element.png
 INPUT ./img/element.png
@@ -162,7 +161,6 @@ INPUT ./img/element.png
 INPUT main.aux
 INPUT main.run.xml
 OUTPUT main.run.xml
-INPUT d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 INPUT d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb
 INPUT d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb
 INPUT d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb
