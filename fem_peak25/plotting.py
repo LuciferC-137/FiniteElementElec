@@ -5,11 +5,11 @@ import functools
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from matplotlib.widgets import Slider, Button
+import matplotlib.pyplot as plt
 import matplotlib.tri as tri
 
-from logger import Logger
-from elements import CircularMesh, Element, Mesh, SquareMesh, Node
-import matplotlib.pyplot as plt
+from .logger import Logger
+from .elements import CircularMesh, Element, Mesh, SquareMesh, Node
 
 
 def auto_axes(func):

@@ -1,9 +1,18 @@
 import os
+import sys
 from matplotlib import pyplot as plt
 import numpy as np
-from elements import Mesh, MeshBuilder
-from plotting import Plotter
-from solver import Solver
+
+# ------------------------ SIMULATED IMPORT ------------------------
+# This line allows to launch the code without the need
+# to install the package. This is bad practice but effective for
+# demonstration purposes.
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+
+from fem_peak25.elements import Mesh, MeshBuilder
+from fem_peak25.plotting import Plotter
+from fem_peak25.solver import Solver
 
 # --------------------------- PARAMETERS ---------------------------
 

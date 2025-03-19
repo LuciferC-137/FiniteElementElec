@@ -1,7 +1,7 @@
 import numpy as np
-from elements import Mesh, MeshBuilder
-from plotting import Plotter
-from solver import Solver
+from fem_peak25.elements import Mesh, MeshBuilder
+from fem_peak25.plotting import Plotter
+from fem_peak25.solver import Solver
 
 # --------------------------- PARAMETERS ---------------------------
 

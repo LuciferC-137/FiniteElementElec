@@ -1,6 +1,6 @@
 import numpy as np
-from elements import Mesh, Element, Node
-from logger import Logger
+from .elements import Mesh, Element, Node
+from .logger import Logger
 
 RED = '\033[91m'
 RESET = '\033[0m'

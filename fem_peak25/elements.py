@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Iterator
 import numpy as np
 from math import pi, cos, sin, floor
-from logger import Logger
+from .logger import Logger
 
 RED = '\033[91m'
 RESET = '\033[0m'

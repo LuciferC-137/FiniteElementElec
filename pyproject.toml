@@ -1,0 +1,18 @@
+[project]
+name = "fem_peak25"
+version = "0.1.0"
+description = "Python FEM solver applied to peak effect"
+authors = [
+    {name = "Maxime Bloch", email = "maxoscar.bloch@gmail.com"},
+    {name = "Eliaz Lehel", email = "eliaz.lehel@gmail.com"}
+]
+license = {text = "GPL-3.0"}
+readme = "README.md"
+requires-python = ">=3.8"
+
+[project.urls]
+Homepage = "https://github.com/LuciferC-137/FiniteElementElec"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
