@@ -1,2 +1,5 @@
 **__pycache__/
 example/output/**.png
+**build/
+**egg-info/
+output/

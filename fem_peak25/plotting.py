@@ -1,5 +1,4 @@
 import os
-import sys
 import numpy as np
 import functools
 from matplotlib.axes import Axes
@@ -35,19 +34,31 @@ def auto_axes(func):
 class Plotter:
 
     @staticmethod
-    def savefig(fig: Figure, name: str) -> None:
+    def savefig(fig: Figure, name: str, dir: str = None) -> None:
         """
-        Method to save the current figure to the directory 'output'.
-        Any previous png picture with the same name will be overridden.
+        Method to save the current figure to the directory 'output'
+        located at the root of the project. Any previous png picture 
+        with the same name will be overridden.
 
         Parameters
         ----------
-            fig: matplotlib.figure.Figure
-                The figure to save
-            name: str
-                The name of the future picture file
+            fig : matplotlib.figure.Figure
+                The figure to be saved.
+            name : str
+                The name of the file.
         """
-        fig.savefig(os.path.join(sys.path[0], 'output', name + '.png'),
+        if dir is None:
+            root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                                    '..'))
+            output_dir = os.path.join(root_dir, 'example', 'output')
+            os.makedirs(output_dir, exist_ok=True)
+        else:
+            if os.path.exists(dir):
+                output_dir = dir
+            else:
+                Logger().raise_error(f"The directory '{dir}' does not exist.")
+
+        fig.savefig(os.path.join(output_dir, name + '.png'),
                     dpi=1000, bbox_inches='tight', transparent=True)
 
     @staticmethod
@@ -410,9 +421,9 @@ class Plotter:
         x = np.array([node.x for node in mesh])
         y = np.array([node.y for node in mesh])
         z = u.reshape((mesh.n, mesh.n))
-        ax.imshow(z, extent=(x.min(), x.max(), y.min(), y.max()),
-                   origin='lower', cmap=cmap)
-        ax.get_figure().colorbar(label='Potential')
+        im = ax.imshow(z, extent=(x.min(), x.max(), y.min(), y.max()),
+                       origin='lower', cmap=cmap)
+        ax.get_figure().colorbar(im, label='Potential')
         ax.set_xlabel('x')
         ax.set_ylabel('y')
         ax.set_title('Potential Distribution')
@@ -451,9 +462,9 @@ class Plotter:
         dx, dy = np.gradient(z)
         magnitude = np.sqrt(dx**2 + dy**2)
 
-        ax.imshow(magnitude, extent=(x.min(), x.max(), y.min(), y.max()),
-                origin='lower', cmap=cmap)
-        ax.get_figure().colorbar(label='Electric Field Intensity')
+        im = ax.imshow(magnitude, extent=(x.min(), x.max(), y.min(), y.max()),
+                       origin='lower', cmap=cmap)
+        ax.get_figure().colorbar(im, label='Electric Field Intensity')
         ax.set_xlabel('x')
         ax.set_ylabel('y')
         ax.set_title('Electric Field')
