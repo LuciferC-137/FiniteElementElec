@@ -7,6 +7,34 @@
 \usepackage[margin=1.2in]{geometry}
 \usepackage{color}
 \usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{methods_yellow}{rgb}{0.7, 0.6, 0.0}
+\definecolor{variable_bleu}{rgb}{0.3, 0.6, 0.8}
+\definecolor{keywords_purple}{rgb}{0.7, 0.0, 0.6}
+\definecolor{comments_green}{rgb}{0.1, 0.5, 0.1}
+\definecolor{listing_background}{rgb}{0.15, 0.15, 0.15}
+\definecolor{dark_white}{rgb}{0.9, 0.9, 0.9}
+
+\lstset{
+  language=Python,
+  keywordstyle=\color{keywords_purple},
+  identifierstyle=\color{variable_bleu},
+  emph={solve_mesh,compute_element_stiffness_matrix,
+        apply_boundary_conditions,compute_rigidity_matrix},
+  emphstyle=\color{methods_yellow},
+  commentstyle=\color{comments_green},
+  backgroundcolor=\color{listing_background},
+  basicstyle=\ttfamily\small\color{dark_white},
+  xleftmargin=1em,
+  framexleftmargin=0.5em,
+  framexrightmargin=0.5em,
+  frame=single,
+  breaklines=true,
+  tabsize=2
+}
 
 \begin{document}
 
@@ -72,21 +100,21 @@ de Laplace :
 \subsection{Equation à résoudre}
 
 \hspace{0.5cm}
-On cherche à résoudre l'équation de Laplace sur un domaine $\Omega$ avec des
+Nous cherchons à résoudre l'équation de Laplace sur un domaine $\Omega$ avec des
 conditions aux limites de Dirichlet sur le domaine $\Gamma_D$.
 
-On pose $u$ le potentiel électrostatique. On veut résoudre:
+On pose $u$ le potentiel électrostatique. Nous voulons résoudre:
 
 \begin{equation}
    \frac{\partial^2 u}{\partial x^2} + \frac{\partial^2 u}{\partial y^2} = 0
 \end{equation}
 
-On introduit les fonctions $v$ sur $\Omega$ le domaine de définition de $u$,
+Nous introduisons les fonctions $v$ sur $\Omega$ le domaine de définition de $u$,
 notre potentiel, avec $v \in V = \{H^1(\Omega); v|_{\Gamma_D} = 0 \}$, où
 $H^1(\Omega)$ est l'espace de Hilbert des fonctions dérivables au sens des
 distributions et carrés intégrables sur $\Omega$.
 
-Pour appliquer la méthode des éléments finis, on utilise Green
+Pour appliquer la méthode des éléments finis, nous utilisons Green
 pour écrire:
 
 \begin{equation}
@@ -94,7 +122,7 @@ pour écrire:
     - \int_{\Gamma} \partial_n u(s) v(s) ds
 \end{equation}
 
-Par définition, les fonctions tests $v$ sont nulles sur le bord $\Gamma$. On a
+Par définition, les fonctions tests $v$ sont nulles sur le bord $\Gamma$. Nous avons
 donc:
 
 \begin{equation}
@@ -105,7 +133,7 @@ donc:
 L'équation \ref{eq:weak_form} est appelée la formulation
 faible de notre problème.
 
-Ainsi, on cherche $u$ telle que pour tout $v$ dans l'espace
+Ainsi, nous cherchons $u$ telle que pour tout $v$ dans l'espace
 de Hilbert $H^1(\Omega)$, l'équation \ref{eq:weak_form} soit vérifiée.
 
 On peut réécrire cette équation sous la forme suivante:
@@ -121,7 +149,7 @@ On ajoute maintenant la condition de Dirichlet sur le bord $\Gamma_D$:
     \Leftrightarrow  u-g \in V
 \end{equation}
 
-Dès lors, on peut approcher le problème avec la solution 
+Dès lors, nous pouvons approcher le problème avec la solution 
 $u^h$ dans un espace de dimension finie $V^h$.
 
 On a donc:
@@ -146,7 +174,7 @@ On revient au problème équivalent suivant:
     a(u^h - g^h, v^h) = - a(g^h, v^h)
 \end{equation}
 
-On pose maintenant les coefficients $A_{ij} = a(B^h_j, B^h_i)$. Ainsi, on peut
+On pose maintenant les coefficients $A_{ij} = a(B^h_j, B^h_i)$. Ainsi, nous pouvons
 réécrire le problème sous forme matricielle:
 
 \begin{equation}
@@ -175,24 +203,27 @@ Ce qui équivaut à résoudre:
 
 \subsection{Méthode des éléments finis}
 
-On doit maintenant assurer le raccord entre les différents éléments.
-Pour ce faire, on considère dorénavant les fonctions tests
+Nous devons maintenant assurer le raccord entre les différents éléments.
+Pour ce faire, nous considérons dorénavant les fonctions tests
 polynomiales $v \in X^h$.
 
 Dès lors, on montre que chaque fonction $v$
 est définie par les valeurs qu'elle prend
-sur les nœuds du maillage et on peut les écrire comme une combinaison
+sur les nœuds du maillage et nous pouvons les écrire comme une combinaison
 linéaire des fonctions $B_i$, les fonctions chapeau généralisées.
 
-Ainsi, on assure directement la continuité de $v$ sur les éléments en
+Ainsi, nous assurons directement la continuité de $v$ sur les éléments en
 ayant simplement les mêmes valeurs aux nœuds.
 
+\newpage
 
 \subsection{Maillage du domaine}
 
 \hspace{0.5cm}
 Nous allons discrétiser le domaine en éléments finis et résoudre le problème
-de Laplace par la méthode des éléments finis.
+de Laplace par la méthode des éléments finis. Dans un premier temps,
+nous avons choisi de considérer une géométrie simple, mais les calculs
+qui vont suivre demeurent généraux jusqu'à la section \ref{sec:cadre_du_pb}.
 
 La figure \ref{fig:pointe_ef} représente la discrétisation du domaine en éléments
 finis. Nous nous placerons en deux dimensions.
@@ -212,6 +243,8 @@ On rappelle qu'on doit résoudre le problème suivant:
         a(u^h, v^h) = 0, \hspace{0.3cm} \forall v^h \in V^h
     \end{cases}   
 \end{equation}
+
+\newpage
 
 \subsection{Décomposition des polynômes sur un élément}
 
@@ -255,7 +288,7 @@ $K^{[e]}$ telle que pour un élément [e]:
     \label{eq:int_to_K}
 \end{equation}
 
-Si on considère un seul élément [e], on peut chercher à expliciter
+Si nous considérons un seul élément [e], nous pouvons chercher à expliciter
 les termes de la matrice de raideur $K^{[e]}$.
 
 On réécrit le problème comme suit:
@@ -354,7 +387,7 @@ Avec la matrice $P^{[e]}$ définie par:
 \end{equation}
 
 Par ailleurs, en dérivant les formes générales
-de $u$ et $v$, on peut écrire:
+de $u$ et $v$, nous pouvons écrire:
 
 \begin{align}
     \begin{bmatrix}
@@ -478,6 +511,7 @@ Notez qu'ici, $D$ est de taille 2x3, $\overline{A^{[e]}}$
 de taille 2x2 et $H^{[e]}$ de taille 3x3.
 
 \subsection{Expression des matrices dans le cadre du problème}
+\label{sec:cadre_du_pb}
 
 En pratique, avec notre problème, nous savons que:
 
@@ -497,7 +531,7 @@ Car, rappelons-le, notre formulation faible d'origine est
 Nous avons maintenant besoin de connaître la matrice $H^{[e]}$
 et la valeur de $|T|$.
 
-Notons $h$ la longueur d'un côté de l'élément [e]. On a donc
+Notons $h$ la longueur d'un côté de l'élément [e]. Nous avons donc
 $h = x_2 - x_1 = y_2 - y_1$. Dès lors,
 
 \begin{equation}
@@ -505,7 +539,7 @@ $h = x_2 - x_1 = y_2 - y_1$. Dès lors,
 \end{equation}
 
 
-Par ailleurs, on peut inverser la matrice $P^{[e]}$ pour obtenir
+Par ailleurs, nous pouvons inverser la matrice $P^{[e]}$ pour obtenir
 la matrice $H^{[e]}$. Par calcul, on trouve:
 
 \begin{equation}
@@ -538,7 +572,7 @@ sur chaque élément, l'équation \ref{eq:general_problem} nous permet
 de connaitre les coefficients de $K$, la matrice de rigidité globale
 du problème.
 
-En effet, on a la correspondance suivante:
+En effet, nous avons la correspondance suivante:
 
 \begin{equation}
     \begin{bmatrix}
@@ -620,6 +654,110 @@ il en découle simplement un système linéaire à résoudre:
 
 Et c'est bien ce calcul qui sera réalisé dans notre code.
 
+\newpage
+
 \section{Présentation du code}
+
+L'architecture du code, la présentation des classes et de leurs
+méthodes est déjà décrites extensivement dans le \verb|README|
+du projet ainsi que sur le wiki associée.
+(\href{https://github.com/LuciferC-137/FiniteElementElec}{Lien vers GitHub})
+
+Dans cette section est donc détaillé le fonctionnement
+mathématique du solveur et comment il implémente les équations
+présentées précédemment.
+
+Il y a quatre méthodes principales dans le solveur:
+
+\begin{itemize}
+    \item \verb|solve_mesh()|
+    \item \verb|compute_rigidity_matrix()|
+    \item \verb|apply_boundary_conditions()|
+    \item \verb|compute_element_stiffness_matrix()|
+\end{itemize}
+
+La première résout le problème en appelant les autres.
+La deuxième calcule la matrice de raideur $K$ nécessaire à la
+résolution du problème, la troisième applique les conditions
+limites à la matrice de raideur pour obtenir $K^*$ et $F$, et la dernière calcule
+une matrice élémentaire $K^{[e]}$.
+
+Bien évidemment, elles ne sont pas appelées dans cet ordre. Voici
+comment se déroule l'algorithme:
+
+\begin{enumerate}
+    \item Pour chaque éléments du maillage,
+    on calcule la matrice de raideur élémentaire $K^{[e]}$.
+    \item Pour chaque noeud, on ajoute ses contributions en "ajoutant" $K^{[e]}$ à l'endroit approprié de $K$.
+    \item On applique les conditions limites à $K$ pour obtenir $K^*$ et on détermine $F$.
+    \item On résout le système linéaire $K^* \cdot u = F$.
+\end{enumerate}
+
+Une version de pseudo-code simplifiée et verbalisée de chaque méthode 
+est présentée au listing \ref{lst:solver} ci-après.
+
+\newpage
+
+\begin{lstlisting}[caption={Structure simplifiée du solveur} \label{lst:solver}]
+    def solve_mesh():
+        # On cree la matrice avec toutes les contributions
+        K = compute_rigidity_matrix()
+        F = np.zeros(mesh.size())
+        # On s'assure de retirer les contributions des noeuds a valeur fixe
+        apply_boundary_conditions(K, F, mesh)
+        # On appel numpy pour resoudre le systeme lineaire
+        u = np.linalg.solve(K, F)
+        return u
+    
+    def compute_rigidity_matrix():
+        K = np.zeros((n_nodes, n_nodes))
+        for element in mesh.elements():
+            # Pour chaque element, on rempli Ke
+            Ke = compute_element_stiffness_matrix(element)
+            for i, node_i in element.nodes:
+                for j, node_j in element.nodes:
+                    # On ajoute le coeff de Ke correspondant a la
+                    # contribution entre deux noeuds a la matrice K
+                    K[node_i.index, node_j.index] += Ke[i, j]
+        return K
+    
+    def compute_element_stiffness_matrix(element):
+        x = [node.x for node in element]
+        y = [node.y for node in element]
+
+        Pe = np.array([[1, x[0], y[0]],
+                       [1, x[1], y[1]],
+                       [1, x[2], y[2]]])
+        Ae = np.array([[1, 0], [0, 1]])
+        He = np.linalg.inv(Pe) # Inversement de la matrice Pe
+        Te = 0.5 * np.abs(np.linalg.det(Pe)) # Calcul de l'aire du triangle
+        D = np.array([[0, 1, 0],
+                      [0, 0, 1]]) # Matrice de derivation
+        DT = np.array([[0, 0],
+                       [1, 0],
+                       [0, 1]]) # Transpose de D
+
+        Ke = np.transpose(He) @ DT @ Ae @ D @ He * Te # Solution elementaire
+        return Ke
+
+    def apply_boundary_conditions(K):
+        for i in range(mesh.size()):
+            if mesh[i].value is not None:
+                # Si on a une condition limite au noeud i
+                K[i, :] = 0
+                # Alors on retire toutes les contributions des autres noeuds
+                K[i, i] = 1
+                # On devient le seul noeud a participer a notre valeur
+                F[i] = mesh[i].value
+                # Et la solution pour ce noeud sera nous-meme
+    
+    \end{lstlisting}
+
+\newpage
+
+\section{Comparaison des résultats avec la théorie}
+
+
+
 
 \end{document}
