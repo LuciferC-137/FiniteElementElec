@@ -22,6 +22,7 @@ fem_peak25/
 │   └── main.tex
 ├── output/
 ├── examples/
+│   ├── comparison.py
 │   ├── peak_circle.py
 │   └── peak_square.py
 ├── fem_peak25/

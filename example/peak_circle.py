@@ -16,9 +16,9 @@ from fem_peak25.solver import Solver
 
 # --------------------------- PARAMETERS ---------------------------
 
-# Number of nodes in one line
+# Number of nodes in the circumference
 n = 20
-# Length of the square (physical)
+# Diameter of the circle (physical)
 L = 1
 # Angle of the peak (rad)
 theta0 = 3 * np.pi / 4
