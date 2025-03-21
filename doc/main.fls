@@ -224,6 +224,16 @@ INPUT d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/tfm/public/cm/cmtt10.tfm
 INPUT d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/tfm/jknappen/ec/tcrm1000.tfm
 INPUT d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc
 INPUT d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/tfm/public/cm/cmtt9.tfm
+INPUT ./img/comparison.png
+INPUT ./img/comparison.png
+INPUT ./img/comparison.png
+INPUT ./img/comparison.png
+INPUT ./img/comparison.png
+INPUT ./img/difference.png
+INPUT ./img/difference.png
+INPUT ./img/difference.png
+INPUT ./img/difference.png
+INPUT ./img/difference.png
 INPUT main.aux
 INPUT ./main.out
 INPUT ./main.out

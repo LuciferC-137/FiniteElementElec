@@ -663,6 +663,8 @@ méthodes est déjà décrites extensivement dans le \verb|README|
 du projet ainsi que sur le wiki associée.
 (\href{https://github.com/LuciferC-137/FiniteElementElec}{Lien vers GitHub})
 
+\subsection{Solveur}
+
 Dans cette section est donc détaillé le fonctionnement
 mathématique du solveur et comment il implémente les équations
 présentées précédemment.
@@ -757,7 +759,155 @@ est présentée au listing \ref{lst:solver} ci-après.
 
 \section{Comparaison des résultats avec la théorie}
 
+Pour comparer notre code avec la théorie,
+nous proposon de revenir à la situation initiale
+d'une pointe dans une géométrie sphérique.
 
+Nous utiliserons donc le maillage sphérique proposé
+par notre code et nous comparerons les résultats
+avec la solution analytique.
 
+\subsection{Solution analytique}
+
+Nous avons posé la condition limite suivante:
+
+\begin{equation}
+    V_1(\theta) = 1 - \frac{\theta^2}{\theta_0^2}
+\end{equation}
+
+En notant $V_1$ la fonction de potentiel en $r=1$.
+
+Au vu de la géométrie, son cherche une décomposition
+de la fonction potentiel en coordonnées sphériques
+avec des solutions connus de l'équation de Laplace,
+c'est-à-dire les harmoniques sphériques (car leurs
+laplaciens sont nuls).
+
+Ces fonctions notées $\Phi_n(r, \theta)$ s'écrivent:
+
+\begin{equation}
+    \Phi_n(r, \theta) =
+    r^{\frac{(2n+1)\pi}{2 \theta_0}}
+    cos\left(\frac{(2n+1)\pi}{2\theta_0}\theta\right)
+\end{equation}
+
+Ces fonctions sont solutions de l'équation de Laplace
+et forment une base de l'espace des fonctions harmoniques
+sphériques, tout en vérifiant les propriétés qui
+nous intéressent, à savoir qu'elles s'annulent bien
+en $\theta = \pm \theta_0$.
+
+Dès lors, il existe une suite $(a_n)$ telle que:
+
+\begin{equation}
+    V(r,\theta) = \sum_{n=0}^{+\infty} a_n \Phi_n(r, \theta)
+\end{equation}
+
+Pour calculer les coefficients $a_n$, nous allons exploiter
+la condition limite en $r=1$.
+
+\begin{equation}
+    1 - \frac{\theta^2}{\theta_0^2}
+    = \sum_{n=0}^{+\infty} a_n
+    cos\left(\frac{(2n+1)\pi}{2\theta_0}\theta\right)
+\end{equation}
+
+On reconnait ici la décomposition en série de Fourier
+de la fonction $V_1$. On peut donc d'après Fourier exprimer
+les coefficients $a_n$ comme suit:
+
+\begin{equation}
+    a_n = \frac{1}{\theta_0}
+    \int_{-\theta_0}^{\theta_0}
+    \left(1 - \frac{\theta^2}{\theta_0^2}\right)
+    cos\left(\frac{(2n+1)\pi}{2\theta_0}\theta\right) d\theta
+\end{equation}
+
+Nous allons résoudre cette équation pour tout n en réalisant
+deux intégrations par partie.
+
+\begin{align*}
+    a_n & = \frac{1}{\theta_0}
+        \int_{-\theta_0}^{\theta_0}
+        \left(1 - \frac{\theta^2}{\theta_0^2}\right)
+        cos\left(\frac{(2n+1)\pi}{2\theta_0}\theta\right)
+        d\theta \\
+        & = \frac{1}{\theta_0}
+        \left(
+            \left[ \frac{-2\theta_0}{(2n+1)\pi}
+             sin\left(\frac{(2n+1)\pi}{2\theta_0}\right)
+             \frac{2\theta}{\theta_0^2} \right]_{-\theta_0}^{\theta_0}
+             + \int_{-\theta_0}^{\theta_0}
+             \frac{2\theta_0}{(2n+1)\pi}
+             sin\left(\frac{(2n+1)\pi}{2\theta_0}\right)
+             \frac{2\theta}{\theta_0^2}
+         \right) \\
+        & = \frac{2}{(2n+1)\pi}
+        \left( 0 +
+            \left[ \frac{-2\theta_0}{(2n+1)\pi}
+             cos\left(\frac{(2n+1)\pi}{2\theta_0}\right)
+             \frac{2\theta}{\theta_0^2} \right]_{-\theta_0}^{\theta_0}
+             + \int_{-\theta_0}^{\theta_0}
+             \frac{2\theta_0}{(2n+1)\pi}
+             cos\left(\frac{(2n+1)\pi}{2\theta_0}\right)
+             \frac{2}{\theta_0^2}
+         \right) \\
+        & = \frac{2}{\left((2n+1)\pi\right)^2} 
+        \left(0 +
+            \left[\frac{2\theta_0}{(2n+1)\pi}
+            sin\left(\frac{(2n+1)\pi}{2\theta_0}\right)
+            \frac{4}{\theta_0}
+             \right]_{-\theta_0}^{\theta_0}
+         \right) \\
+        & = \frac{16}{\left((2n+1)\pi\right)^3}
+        \left(
+            sin\left(\frac{(2n+1)\pi}{2}\right)
+            - sin\left(\frac{-(2n+1)\pi}{2}\right)
+        \right) \\
+        & = \left(-1\right)^n \frac{32}{
+            \left((2n+1)\pi\right)^3}
+\end{align*}
+
+Ainsi, on peut écrire la forme générale du potentiel $V$:
+
+\begin{equation}
+    V(r, \theta) = \sum_{n=0}^{+\infty}
+    \left(-1\right)^n \frac{32}{
+        \left((2n+1)\pi\right)^3}
+    r^{\frac{(2n+1)\pi}{2 \theta_0}}
+    cos\left(\frac{(2n+1)\pi}{2\theta_0}\theta\right)
+\end{equation}
+
+Au vu de la forme des coefficients, on peut considérer que 
+les dix premiers termes de la série suffisent à obtenir une
+bonne approximation de la solution.
+
+\newpage
+
+\subsection{Résultats}
+
+Nous avons donc résolu le problème avec notre code
+et nous avons obtenu les résultats présentés dans la
+figure \ref{fig:analytic_vs_numeric}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.5]{img/comparison.png}
+    \caption{Comparaison des résultats analytiques et numériques}
+    \label{fig:analytic_vs_numeric}
+\end{figure}
+
+Les formes des potentiels se ressemblent beaucoup.
+
+Pour emphaser les différences, on trace la distance en valeur
+absolue entre les deux solutions en chaque point du plan
+dans la figure \ref{fig:diff}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.5]{img/difference.png}
+    \caption{Différence entre les solutions analytiques et numériques}
+    \label{fig:diff}
+\end{figure}
 
 \end{document}

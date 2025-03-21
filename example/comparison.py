@@ -18,13 +18,16 @@ from fem_peak25.logger import Logger
 # --------------------------- PARAMETERS ---------------------------
 
 # Number of nodes in the circumference
-n = 60
-# Diameter of the circle (physical)
-L = 1
+n = 180
+# Diameter of the circle (physical) Do not change this value for consistency
+L = 2
 # Angle of the peak (rad)
 theta0 = 3 * np.pi / 4
 # Maximum potential at the boudary
 potential = 1.0
+
+# Resolution of the pictures
+res = 400
 
 # ------------------------------ MAIN ------------------------------
 # Creating mesh
@@ -45,15 +48,19 @@ solver = Solver(mesh)
 u = solver.solve_mesh()
 
 # Computing the continuous solution
-z = solver.compute_continous_solutions(mesh, u, res=200)
+z = solver.compute_continous_solutions(mesh, u, res=res)
 
 # --------------- ANALYTICAL SOLUTION --------------------------------
 
 order = 10
 
-def a_n(n, theta0):
-    denom = (2 * n + 1) * np.pi
-    return  1 / (denom * denom)
+def a_n(n):
+    denom = (2 * n + 1)
+    pi_cub = np.pi * np.pi * np.pi
+    res = 32 / (denom * denom * denom * pi_cub)
+    if (n % 2 == 0):
+        return res
+    return -res
 
 def phi_n(n, r, theta, theta0):
     return r**((2 * n + 1) * np.pi / 2 / theta0) \
@@ -61,12 +68,11 @@ def phi_n(n, r, theta, theta0):
 
 def V(r, theta, theta0, order):
     result = 0
-    for n in range(order):
-        result += a_n(n, theta0) * phi_n(n, r, theta, theta0)
+    for n in range(order + 1):
+        result += a_n(n) * phi_n(n, r, theta, theta0)
     return result
 
 # Computing the analytical solution
-res = 200
 
 X = np.linspace(-L/2, L/2, res)
 Y = np.linspace(-L/2, L/2, res)
@@ -102,3 +108,18 @@ ax_ana.set_title('Analytical solution')
 ax_ana.axis("equal")
 ax_ana.get_figure().tight_layout()
 plt.show()
+Plotter.savefig(fig, "comparison")
+
+plt.close()
+
+fig, ax = plt.subplots()
+ax : Axes
+im = ax.imshow(Z - z.reshape(res, res),
+               extent=[-L, L, -L, L], origin='lower', cmap='coolwarm')
+fig.colorbar(im, label='Difference')
+ax.axis("equal")
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.set_title('Difference')
+plt.show()
+Plotter.savefig(fig, "difference")

@@ -1,13 +1,13 @@
 # Fdb version 4
-["biber main"] 0 "main.bcf" "main.bbl" "main" 1742491951.58008 -1
+["biber main"] 0 "main.bcf" "main.bbl" "main" 1742572029.86601 -1
   "biblio.bib" 1742327278 0 d41d8cd98f00b204e9800998ecf8427e ""
-  "main.bcf" 1742491951 108083 05647910461ce3a9682aa14778dd636b "pdflatex"
+  "main.bcf" 1742572029 108083 05647910461ce3a9682aa14778dd636b "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1742491948.77924 "d:/Document/Travail/Ecole/3A/DEMIN/ONPLCI/PB_Gossiaux/code/doc/main.tex" "main.pdf" "main" 1742491951.58151 0
-  "d:/Document/Travail/Ecole/3A/DEMIN/ONPLCI/PB_Gossiaux/code/doc/main.tex" 1742491947 23086 69e9d544f2b4be170b12a9dfaa3078f8 ""
+["pdflatex"] 1742572018.32428 "d:/Document/Travail/Ecole/3A/DEMIN/ONPLCI/PB_Gossiaux/code/doc/main.tex" "main.pdf" "main" 1742572029.86702 0
+  "d:/Document/Travail/Ecole/3A/DEMIN/ONPLCI/PB_Gossiaux/code/doc/main.tex" 1742572005 27962 ab03d602960325ea8d575887381c8da8 ""
   "d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1727273829 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/map/fontname/texfonts.map" 1727282286 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/tfm/jknappen/ec/tcrm1000.tfm" 1727277289 1536 e07581a4bb3136ece9eeb4c3ffab8233 ""
@@ -109,14 +109,16 @@
   "d:/Programmes/LaTeX/texlive/2024/texmf-var/web2c/pdftex/pdflatex.fmt" 1727304713 3326053 40deadd9ad9b91dd545625f6b18652de ""
   "d:/Programmes/LaTeX/texlive/2024/texmf.cnf" 1727304103 713 e69b156964470283e0530f5060668171 ""
   "img/Logo_IMT_Atlantique.png" 1742327270 44450 d782fa7d14003897cd45c577f9c50634 ""
+  "img/comparison.png" 1742571199 1091179 42ac07c44a891def77c0d0ac6a21cba3 ""
+  "img/difference.png" 1742571307 393267 75762f74c5c9adea27cef520754d34c6 ""
   "img/element.png" 1742327868 8489 ad96ee9871a492049eedea3d6ec69dfb ""
   "img/pointe_ef.png" 1742327270 25829 61e4db2a6c7f6c10ab048f6339f16e5e ""
   "img/schema.png" 1742327270 47881 63a559072e9fb9482265371a107867a8 ""
-  "main.aux" 1742491951 3419 1144458aada8c1228a5ef443831bca73 "pdflatex"
+  "main.aux" 1742572029 4311 c266e13731d15ff495cfb94e203a612b "pdflatex"
   "main.bbl" 1742488975 486 76d65a242ec496c9b4361af646ff12cb "biber main"
-  "main.out" 1742491951 2624 c960184653e0ee9cd52b1762b5b280d7 "pdflatex"
-  "main.run.xml" 1742491951 2301 fc418833f88d2cf4592b65b247893834 "pdflatex"
-  "main.tex" 1742491947 23086 69e9d544f2b4be170b12a9dfaa3078f8 ""
+  "main.out" 1742572029 2979 fc6a30a20fbe9a793c3df3c738c2ca70 "pdflatex"
+  "main.run.xml" 1742572029 2301 fc418833f88d2cf4592b65b247893834 "pdflatex"
+  "main.tex" 1742572005 27962 ab03d602960325ea8d575887381c8da8 ""
   (generated)
   "main.aux"
   "main.bcf"
