@@ -48,7 +48,11 @@ solver = Solver(mesh)
 u = solver.solve_mesh()
 
 # Computing the continuous solution
-z = solver.compute_continous_solutions(mesh, u, res=res)
+#z = solver.compute_continous_solutions(mesh, u, res=res)
+z = 0
+
+# Computing electric field
+e = solver.compute_element_gradients(mesh, u)
 
 # --------------- ANALYTICAL SOLUTION --------------------------------
 
@@ -96,30 +100,104 @@ for i in range(res):
             Z[i, j] = np.nan
 Logger().log_prc_done("Computing analytical solutions")
 
-# Plotting
-fig, (ax_fem, ax_ana) = plt.subplots(1, 2)
-Plotter.plot_continous(mesh, z, ax = ax_fem)
-ax_ana : Axes
-im = ax_ana.imshow(Z, extent=[-L, L, -L, L], origin='lower')
-ax_ana.get_figure().colorbar(im, label='Potential')
-ax_ana.set_xlabel('x')
-ax_ana.set_ylabel('y')
-ax_ana.set_title('Analytical solution')
-ax_ana.axis("equal")
-ax_ana.get_figure().tight_layout()
-plt.show()
-Plotter.savefig(fig, "comparison")
+# Computing electric field
+Ex, Ey = np.gradient(Z)
+E = np.sqrt(Ex**2 + Ey**2)
 
-plt.close()
+E_minus_e = np.zeros((res, res))
+cnt = 0
+for i in range(res):
+    for j in range(res):
+        Logger().log_prc("Computing electric field difference",
+                         cnt, res * res)
+        cnt += 1
+        x, y = X[j], Y[i]
+        found = False
+        for element_idx, element in mesh.elements.items():
+            nodes = element.nodes
+            x1, y1 = nodes[0].x, nodes[0].y
+            x2, y2 = nodes[1].x, nodes[1].y
+            x3, y3 = nodes[2].x, nodes[2].y
 
-fig, ax = plt.subplots()
-ax : Axes
-im = ax.imshow(Z - z.reshape(res, res),
-               extent=[-L, L, -L, L], origin='lower', cmap='coolwarm')
-fig.colorbar(im, label='Difference')
-ax.axis("equal")
-ax.set_xlabel('x')
-ax.set_ylabel('y')
-ax.set_title('Difference')
-plt.show()
-Plotter.savefig(fig, "difference")
+            denominator = (y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3)
+            if abs(denominator) < 1e-10:
+                continue
+
+            lambda1 = ((y2 - y3) * (x - x3) + (x3 - x2) * (y - y3)) / denominator
+            lambda2 = ((y3 - y1) * (x - x3) + (x1 - x3) * (y - y3)) / denominator
+            lambda3 = 1 - lambda1 - lambda2
+
+            if 0 <= lambda1 <= 1 and 0 <= lambda2 <= 1 and 0 <= lambda3 <= 1:
+                E_minus_e[i, j] = E[i, j] - e[element_idx]
+                found = True
+                break
+
+        if not found:
+            E_minus_e[i, j] = np.nan
+Logger().log_prc_done("Computing electric field difference")
+
+
+# --------------------------- PLOTTING ------------------------------
+
+plot_potential = False
+plot_potential_difference = False
+
+plot_electric_field = True
+plot_electric_field_difference = True
+
+if plot_potential:
+    fig, (ax_fem, ax_ana) = plt.subplots(1, 2)
+    Plotter.plot_continous(mesh, z, ax = ax_fem)
+    ax_ana : Axes
+    im = ax_ana.imshow(Z, extent=[-L, L, -L, L], origin='lower')
+    ax_ana.get_figure().colorbar(im, label='Potential')
+    ax_ana.set_xlabel('x')
+    ax_ana.set_ylabel('y')
+    ax_ana.set_title('Analytical solution')
+    ax_ana.axis("equal")
+    ax_ana.get_figure().tight_layout()
+    plt.show()
+    Plotter.savefig(fig, "comparison")
+    plt.close()
+
+if plot_potential_difference:
+    fig, ax = plt.subplots()
+    ax : Axes
+    im = ax.imshow(np.abs(Z - z.reshape(res, res)),
+                extent=[-L, L, -L, L], origin='lower', cmap='coolwarm')
+    fig.colorbar(im, label='Difference')
+    ax.axis("equal")
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_title('Difference')
+    plt.show()
+    Plotter.savefig(fig, "difference")
+
+if plot_electric_field:
+    fig, (ax_ana, ax_fem) = plt.subplots(1, 2)
+    Plotter.plot_discontinuous_field(mesh, e, ax = ax_fem)
+    ax_ana : Axes
+    im = ax_ana.imshow(E, extent=[-L, L, -L, L], origin='lower')
+    ax_ana.get_figure().colorbar(im, label='Potential')
+    ax_ana.set_xlabel('x')
+    ax_ana.set_ylabel('y')
+    ax_ana.set_title('Analytical solution')
+    ax_ana.axis("equal")
+    ax_ana.get_figure().tight_layout()
+    plt.show()
+    Plotter.savefig(fig, "comparison_elec")
+    plt.close()
+
+if plot_electric_field_difference:
+    fig, ax = plt.subplots()
+    ax : Axes
+    im = ax.imshow(np.abs(E_minus_e),
+                extent=[-L, L, -L, L], origin='lower', cmap='coolwarm')
+    fig.colorbar(im, label='Difference')
+    ax.axis("equal")
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.set_title('Difference')
+    plt.show()
+    Plotter.savefig(fig, "difference_elec")
+    plt.close()

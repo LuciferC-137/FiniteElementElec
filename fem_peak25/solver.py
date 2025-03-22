@@ -130,7 +130,27 @@ class Solver:
     def compute_continous_solutions(mesh: Mesh, u: np.ndarray,
                                     res: int = 500,
                                     margin: float = 0.05) -> np.ndarray:
-        
+        """
+        Method to compute the continuous solutions of the mesh
+        by interpolating according to the values of the polynomes
+        calculated by the solver.
+
+        Parameters
+        ----------
+            mesh: Mesh
+                The mesh object.
+            u: np.ndarray[float]
+                The solution of the mesh.
+            res: int
+                The resolution of the grid. default: 500 (high)
+            margin: float
+                The margin to add to the mesh. default: 0.05
+
+        Returns
+        -------
+            np.ndarray[float]: The continuous solutions of the mesh
+            (dimension: res x res)        
+        """
         x = np.array([node.x for node in mesh])
         y = np.array([node.y for node in mesh])
         
@@ -187,7 +207,24 @@ class Solver:
         return z
     
     @staticmethod
-    def compute_element_gradients(mesh : Mesh, u : np.ndarray):
+    def compute_element_gradients(mesh : Mesh,
+                                  u : np.ndarray) -> dict[int, float]:
+        """
+        Method to compute the gradients of the elements over the
+        mesh.
+
+        Parameters
+        ----------
+            mesh: Mesh
+                The mesh object.
+            u: np.ndarray[float]
+                The solution of the mesh.
+
+        Returns
+        -------
+            dict[int, float]: The gradients of the elements over the mesh.
+        
+        """
         e = {}
         for element_idx, element in mesh.elements.items():
             nodes : list[Node] = element.nodes

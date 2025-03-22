@@ -69,6 +69,7 @@ Nous nous proposons dans ce travail d'utiliser la méthode des éléments finis
 pour modéliser l'effet de pointe dans un champ électrostatique.
 
 \section{Situation physique}
+\label{sec:situation_physique}
 
 \begin{figure}[!h]
     \centering
@@ -876,6 +877,7 @@ Ainsi, on peut écrire la forme générale du potentiel $V$:
         \left((2n+1)\pi\right)^3}
     r^{\frac{(2n+1)\pi}{2 \theta_0}}
     cos\left(\frac{(2n+1)\pi}{2\theta_0}\theta\right)
+    \label{eq:analytic}
 \end{equation}
 
 Au vu de la forme des coefficients, on peut considérer que 
@@ -886,9 +888,13 @@ bonne approximation de la solution.
 
 \subsection{Résultats}
 
-Nous avons donc résolu le problème avec notre code
-et nous avons obtenu les résultats présentés dans la
-figure \ref{fig:analytic_vs_numeric}.
+Nous avons donc résolu le problème présenté en section
+\ref{sec:situation_physique} avec notre code et comparé
+les résultats avec un calcul analytique à l'ordre 10
+en utilisant la formule l'équation \ref{eq:analytic}.
+Les résultats sont visible figure \ref{fig:analytic_vs_numeric}.
+
+\subsubsection{Comparaison du potentiel}
 
 \begin{figure}[h]
     \centering
@@ -908,6 +914,41 @@ dans la figure \ref{fig:diff}.
     \includegraphics[scale=0.5]{img/difference.png}
     \caption{Différence entre les solutions analytiques et numériques}
     \label{fig:diff}
+\end{figure}
+
+Ces différences sont surtout visibles aux alentours de la pointe
+et le long de celle-ci. Cela s'explique très simplement par
+la forme du maillage dans la simulation. En effet, lors de la
+définition de la géométrie, le maillage de la pointe n'est pas
+contraint de suivre le bord de celle-ci.
+
+On aurait pu ajouter
+cette contrainte, mais nous avons préféré garder une construction
+de maillage simple et automatique, qui introduit donc des 
+discontinuités aux arrêtes de la pointe.
+
+Malgré tout, les différences de potentiels restent très petites
+en valeur absolue, avec un écart maximum de $0.08$ en valeur
+absolue. On ne peut pas véritablement calculer d'erreur relative
+car d'une part la pointe n'est pas exactement la même
+dans le code par rapport au cas théorique, et d'autre par 
+les valeurs de potentiel varient fortement dans cette zone. Une
+comparaison relative stricte est donc exclue.
+
+\subsubsection{Comparaison du champ électrique}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.5]{img/comparison_elec.png}
+    \caption{Comparaison des champs électriques analytiques et numériques}
+    \label{fig:field_comparison}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.5]{img/difference_elec.png}
+    \caption{Différence entre les champs électriques analytiques et numériques}
+    \label{fig:field_diff}
 \end{figure}
 
 \end{document}
