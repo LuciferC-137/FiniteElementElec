@@ -562,8 +562,7 @@ la matrice $H^{[e]}$. Par calcul, on trouve:
 
 Ces simplifications pourraient être faites dans notre code pour
 accélérer les calculs, mais en pratique, on constate que le temps de
-calcul est principalement occupé par la reconstruction des valeurs
-en chaque point du plan (x, y) (pour une certaine résolution donnée)
+calcul est principalement occupé par la construction du maillage
 plutôt que par la résolution elle-même.
 
 Nous avons donc choisi de garder dans notre solveur une forme générale
@@ -573,6 +572,8 @@ car cette matrice dépend du problème physique et non de la géométrie.)
 
 Ceci nous permet, comme nous le verrons dans la suite,
 d'adopter au besoin de nouvelles géométries.
+
+\newpage
 
 \subsection{Assemblage}
 
@@ -668,8 +669,8 @@ Et c'est bien ce calcul qui sera réalisé dans notre code.
 \section{Présentation du code}
 
 L'architecture du code, la présentation des classes et de leurs
-méthodes est déjà décrites extensivement dans le \verb|README|
-du projet ainsi que sur le wiki associée.
+méthodes sont déjà décrits extensivement dans le \verb|README|
+du projet ainsi que sur le wiki associé.
 (\href{https://github.com/LuciferC-137/FiniteElementElec}{Lien vers GitHub})
 
 \subsection{Solveur}
@@ -704,7 +705,7 @@ comment se déroule l'algorithme:
     \item On résout le système linéaire $K^* \cdot u = F$.
 \end{enumerate}
 
-Une version de pseudo-code simplifiée et verbalisée de chaque méthode 
+Une version de pseudo-code simplifiée et commentée de chaque méthode 
 est présentée au listing \ref{lst:solver} ci-après.
 
 \newpage
@@ -798,11 +799,12 @@ de systèmes matriciels.
 Le code offre la possibilité d'afficher de nombreux graphiques
 différents, que ce soit pour assister la construction de maillage
 ou pour sauvegarder des résultats. La figure \ref{fig:plot_ex}
-montre un exemple d'affichage de résultats et de maillage.
+montre un exemple d'affichage de résultats et de maillage
+pour un nombre de noeuds faible.
 
-\begin{figure}[h]
+\begin{figure}[!h]
     \centering
-    \includegraphics[scale = 0.8]{img/plot_ex.png}
+    \includegraphics[width=\textwidth]{img/plot_ex.png}
     \caption{Exemple d'affichage disponible dans le code}
     \label{fig:plot_ex}
 \end{figure}
@@ -812,10 +814,10 @@ montre un exemple d'affichage de résultats et de maillage.
 \section{Comparaison des résultats avec la théorie}
 
 Pour comparer notre code avec la théorie,
-nous proposon de revenir à la situation initiale
-d'une pointe dans une géométrie sphérique.
+nous proposonq de revenir à la situation initiale
+d'une pointe dans une géométrie circulaire.
 
-Nous utiliserons donc le maillage sphérique proposé
+Nous utiliserons donc le maillage circulaire proposé
 par notre code et nous comparerons les résultats
 avec la solution analytique.
 
@@ -829,7 +831,7 @@ Nous avons posé la condition limite suivante:
 
 En notant $V_1$ la fonction de potentiel en $r=1$.
 
-Au vu de la géométrie, son cherche une décomposition
+Au vu de la géométrie, on cherche une décomposition
 de la fonction potentiel en coordonnées sphériques
 avec des solutions connus de l'équation de Laplace,
 c'est-à-dire les harmoniques sphériques (car leurs
@@ -933,7 +935,7 @@ Ainsi, on peut écrire la forme générale du potentiel $V$:
 
 Au vu de la forme des coefficients, on peut considérer que 
 les dix premiers termes de la série suffisent à obtenir une
-bonne approximation de la solution.
+très bonne approximation de la solution.
 
 \newpage
 
@@ -960,9 +962,9 @@ entre les solutions numérique (à gauche) et analytique (à droite).
 
 Les formes des potentiels se ressemblent beaucoup.
 
-Pour emphaser les différences, on trace la l'erreur relative
+Pour emphaser les différences, on trace l'erreur relative
 du code par rapport aux valeurs théoriques en chaque point du plan
-dans la figure \ref{fig:diff} en utilisant la simple différence
+(figure \ref{fig:diff}) en utilisant la simple différence
 relative $(V_{th} - V_{calc}) / V_{th}$ (en valeur absolue).
 
 \begin{figure}[!h]
@@ -999,7 +1001,7 @@ calculés par notre code et par la théorie.
 Précisons déjà que lors d'une résolution par MEF avec des polynômes
 de degré 1, le champ électrique est nécessairement constant
 au sein de chaque élément triangulaire. En effet, si chaque
-l'équation qui décrit le potentiel dans un élément est de degré 1
+équation qui décrit le potentiel dans un élément est de degré 1
 par rapport à chaque coordonnée, alors le champ électrique
 est de degré 0, c'est-à-dire constant, dans chaque élément.
 
@@ -1058,10 +1060,13 @@ On peut aussi voir que la valeur de champ à la pointe
 se rapproche de la valeur calculée (non affiché dans ce document).
 
 Cette tendance devrait bien entendu être étudiée pour un
-plus grand nombre d'échantillon pour être validée,
-mais compte tenu des performances moyenne du code
-en terme de temps de calcul, nous
-n'iront pas plus loin dans cette analyse.
+plus grand nombre d'échantillon pour être validée.
+
+Un maillage adaptatif pourrait également aider,
+ en offrant une meilleure précision dans les
+zones à forte variation, mais une fois encore,
+nous avons préféré rester simple dans la réalisation
+du maillage.
 
 \newpage
 

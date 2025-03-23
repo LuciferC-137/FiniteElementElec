@@ -79,7 +79,7 @@ This documentation is written in french and describes the mathematical backgroun
 
 ## Define your own geometry
 
-To define your own geometry, you need to create a class that inherits from the `Mesh` class and implement the `build` method. This method should return a `Mesh` object. You can see the `CircleMesh` and `SquareMesh` classes in the `fem_peak25/elements.py` file for examples.
+To define your own geometry, you need to create a class that inherits from the `Mesh`. You can see the `CircleMesh` and `SquareMesh` classes in the `fem_peak25/elements.py` file for examples.
 
 If you define your own geometry, you can not use the `MeshBuilder` class to facilitate the construction of your mesh, all should be done by hand. You will need to:
 - Make a dictionnary of nodes
@@ -89,4 +89,4 @@ If you define your own geometry, you can not use the `MeshBuilder` class to faci
 Once this is done, you can define some values
 for some nodes that will be treated as boundary conditions, then you can pass your mesh to the solver.
 
-Every mesh will always have a "peak" node, which is the center of the mesh. It is usually used to compute the "angle from center" to define a proper potential boundary conditions that you can see in the example scripts. But nothing bounds you to use this peak node as a peak, you can use it as any other node.
+See more on this on the [wiki](https://github.com/LuciferC-137/FiniteElementElec/wiki)
