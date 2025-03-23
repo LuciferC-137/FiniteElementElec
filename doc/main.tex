@@ -62,11 +62,17 @@
     \end{titlepage}
 \end{titlepage}
 
+\renewcommand{\contentsname}{Sommaire}
+\tableofcontents
+
+\newpage
+
 \section*{Introduction}
 
 \hspace{1cm}
-Nous nous proposons dans ce travail d'utiliser la méthode des éléments finis
-pour modéliser l'effet de pointe dans un champ électrostatique.
+Nous nous proposons dans ce travail d'utiliser
+la Méthode des Eléments Finis (MEF)
+pour modéliser l'effet de pointe dans un champ électrostatique.\cite{Gossiaux}
 
 \section{Situation physique}
 \label{sec:situation_physique}
@@ -84,7 +90,8 @@ maintenus à un potentiel $V=0$ et les contours de la cavité (en noir) à
 un potentiel constant $V(\theta)$ non nul.
 
 \begin{equation}
-    V(\theta) = 1 - \frac{\theta^2}{\theta_0^2}, \ \text{where } \theta_0=\frac{3\pi}{4}
+    V(\theta) = 1 - \frac{\theta^2}{\theta_0^2},
+    \ \text{avec } \theta_0=\frac{3\pi}{4}
 \end{equation}
 
 Dans ces conditions, le potentiel électrostatique $V$ est solution de l'équation
@@ -219,6 +226,7 @@ ayant simplement les mêmes valeurs aux nœuds.
 \newpage
 
 \subsection{Maillage du domaine}
+\label{sec:maillage}
 
 \hspace{0.5cm}
 Nous allons discrétiser le domaine en éléments finis et résoudre le problème
@@ -666,7 +674,7 @@ du projet ainsi que sur le wiki associée.
 
 \subsection{Solveur}
 
-Dans cette section est donc détaillé le fonctionnement
+Dans cette section est détaillé le fonctionnement
 mathématique du solveur et comment il implémente les équations
 présentées précédemment.
 
@@ -755,6 +763,49 @@ est présentée au listing \ref{lst:solver} ci-après.
                 # Et la solution pour ce noeud sera nous-meme
     
     \end{lstlisting}
+
+\newpage
+
+\subsection{Maillage disponibles et architecture}
+
+Le code a été pensé selon une programmation orientée objet
+avec le langage de programmation \verb|Python|.
+
+Cette architecture a l'avantage de permettre une configuration
+simple de nouveaux maillages, et c'est la raison pour laquelle
+nous avons proposé deux options: un maillage carré comme présenté
+dans la section \ref{sec:maillage}, et un maillage circulaire
+plus proche de la situation étudiée d'après le schéma
+figure \ref{fig:pointe}.
+
+Chacun de ces maillages implémente une classe abstraite
+\verb|Mesh| qui définit les propriétés que doit avoir
+le maillage afin d'être traité par le solveur.
+
+Puisque le solveur est codé de manière générale, un utilisateur
+pourrait définir son propre maillage grâce aux classe de notre
+code et le résoudre simplement.
+
+Nous faisons également remarquer que la création d'un maillage
+circulaire n'est pas optimisée et peut rapidement prendre du temps.
+Cependant, le solveur est plutôt rapide grâce à l'utilisation
+du package \verb|numpy| qui permet une résolution optimisée
+de systèmes matriciels.
+
+
+\subsection{Forme des résultats}
+
+Le code offre la possibilité d'afficher de nombreux graphiques
+différents, que ce soit pour assister la construction de maillage
+ou pour sauvegarder des résultats. La figure \ref{fig:plot_ex}
+montre un exemple d'affichage de résultats et de maillage.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale = 0.8]{img/plot_ex.png}
+    \caption{Exemple d'affichage disponible dans le code}
+    \label{fig:plot_ex}
+\end{figure}
 
 \newpage
 
@@ -887,6 +938,7 @@ bonne approximation de la solution.
 \newpage
 
 \subsection{Résultats}
+\label{sec:results}
 
 Nous avons donc résolu le problème présenté en section
 \ref{sec:situation_physique} avec notre code et comparé
@@ -896,7 +948,10 @@ Les résultats sont visible figure \ref{fig:analytic_vs_numeric}.
 
 \subsubsection{Comparaison du potentiel}
 
-\begin{figure}[h]
+La figure \ref{fig:analytic_vs_numeric} montre la comparaison
+entre les solutions numérique (à gauche) et analytique (à droite).
+
+\begin{figure}[!h]
     \centering
     \includegraphics[scale=0.5]{img/comparison.png}
     \caption{Comparaison des résultats analytiques et numériques}
@@ -905,11 +960,12 @@ Les résultats sont visible figure \ref{fig:analytic_vs_numeric}.
 
 Les formes des potentiels se ressemblent beaucoup.
 
-Pour emphaser les différences, on trace la distance en valeur
-absolue entre les deux solutions en chaque point du plan
-dans la figure \ref{fig:diff}.
+Pour emphaser les différences, on trace la l'erreur relative
+du code par rapport aux valeurs théoriques en chaque point du plan
+dans la figure \ref{fig:diff} en utilisant la simple différence
+relative $(V_{th} - V_{calc}) / V_{th}$ (en valeur absolue).
 
-\begin{figure}[h]
+\begin{figure}[!h]
     \centering
     \includegraphics[scale=0.5]{img/difference.png}
     \caption{Différence entre les solutions analytiques et numériques}
@@ -927,28 +983,100 @@ cette contrainte, mais nous avons préféré garder une construction
 de maillage simple et automatique, qui introduit donc des 
 discontinuités aux arrêtes de la pointe.
 
-Malgré tout, les différences de potentiels restent très petites
-en valeur absolue, avec un écart maximum de $0.08$ en valeur
-absolue. On ne peut pas véritablement calculer d'erreur relative
-car d'une part la pointe n'est pas exactement la même
-dans le code par rapport au cas théorique, et d'autre par 
-les valeurs de potentiel varient fortement dans cette zone. Une
-comparaison relative stricte est donc exclue.
+Malgré tout, les différences de potentiels restent satisfaisante
+sur l'ensemble du maillage. L'échelle a néanmoins
+été forcée à 100\%, des différences plus élevées apparaissent au niveau
+de la pointe elle-même, principalement à cause de la géométrie
+approximée.
+
+\newpage
 
 \subsubsection{Comparaison du champ électrique}
 
-\begin{figure}[h]
+Nous allons maintenant comparer les champs électriques
+calculés par notre code et par la théorie.
+
+Précisons déjà que lors d'une résolution par MEF avec des polynômes
+de degré 1, le champ électrique est nécessairement constant
+au sein de chaque élément triangulaire. En effet, si chaque
+l'équation qui décrit le potentiel dans un élément est de degré 1
+par rapport à chaque coordonnée, alors le champ électrique
+est de degré 0, c'est-à-dire constant, dans chaque élément.
+
+\newpage
+
+La figure \ref{fig:field_comparison} montre la comparaison
+entre les champs électriques
+numériques (à gauche) et analytiques (à droite).
+
+
+\begin{figure}[!h]
     \centering
     \includegraphics[scale=0.5]{img/comparison_elec.png}
     \caption{Comparaison des champs électriques analytiques et numériques}
     \label{fig:field_comparison}
 \end{figure}
 
-\begin{figure}[h]
+La figure \ref{fig:field_diff} montre la différence relative entre
+les champs électriques numériques et analytiques
+$(E_{th} - E_{calc}) / E_{th}$ (en valeur absolue). Une fois
+de plus, les différences sont minimes expecté sur la pointe,
+principalement à cause de la géométrie du maillage.
+
+On observe également les mêmes discontinuités sur le bord
+de la pointe que pour le potentiel.
+
+\begin{figure}[!h]
     \centering
     \includegraphics[scale=0.5]{img/difference_elec.png}
-    \caption{Différence entre les champs électriques analytiques et numériques}
+    \caption{Différence relative entre les champs électriques analytiques et numériques}
     \label{fig:field_diff}
 \end{figure}
+
+\newpage
+
+\subsubsection{Influence du nombre de nœuds}
+
+Lorsqu'on augmente le nombre de nœuds, on s'attend à ce que les écarts
+diminuent. Et c'est bien ce qu'on observe en pratique.
+
+\begin{figure}[!h]
+    \centering
+    \includegraphics[scale=0.5]{img/difference_elec_7651.png}
+    \caption{Illustration de l'impact du nombre de nœuds}
+    \label{fig:nodes_number_impact}
+\end{figure}
+
+La figure \ref{fig:nodes_number_impact} montre la différence
+relative du champ électrique pour deux nombres de nœuds
+différents, 7651 et 2791 nœuds. On remarque que les
+différences visibles sur l'ensemble du maillage diminuent,
+de même que la valeur maximale de la différence, ce qui
+signifie que nous nous approchons d'une meilleure solution.
+
+On peut aussi voir que la valeur de champ à la pointe
+se rapproche de la valeur calculée (non affiché dans ce document).
+
+Cette tendance devrait bien entendu être étudiée pour un
+plus grand nombre d'échantillon pour être validée,
+mais compte tenu des performances moyenne du code
+en terme de temps de calcul, nous
+n'iront pas plus loin dans cette analyse.
+
+\newpage
+
+\section{Conclusion}
+
+D'après les résultats de la section \ref{sec:results}, nous pouvons
+dire que le code a un comportement statisfaisant vis-à-vis de la
+situation simulée. De plus, il renvoie des valeurs cohérentes de
+potentiel et de champ électrique.
+
+Ces résultats peuvent être améliorés, notamment en définissant
+une géométrie plus adaptée avec un maillage "lisse" au bord
+de la pointe. L'architecture actuelle du code permet en tout
+cas une implémentation facilitée de nouvelles géométries.
+
+\printbibliography[title={Références}]
 
 \end{document}

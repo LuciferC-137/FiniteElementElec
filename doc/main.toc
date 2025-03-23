@@ -1,0 +1,22 @@
+\contentsline {section}{\numberline {1}Situation physique}{2}{section.1}%
+\contentsline {section}{\numberline {2}Modélisation par éléments finis}{3}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Equation à résoudre}{3}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Méthode des éléments finis}{4}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Maillage du domaine}{5}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Décomposition des polynômes sur un élément}{6}{subsection.2.4}%
+\contentsline {subsection}{\numberline {2.5}Matrice de raideur partielle}{6}{subsection.2.5}%
+\contentsline {subsection}{\numberline {2.6}Réécriture sous forme matricielle}{7}{subsection.2.6}%
+\contentsline {subsection}{\numberline {2.7}Expression des matrices dans le cadre du problème}{8}{subsection.2.7}%
+\contentsline {subsection}{\numberline {2.8}Assemblage}{9}{subsection.2.8}%
+\contentsline {subsection}{\numberline {2.9}Conditions limites}{9}{subsection.2.9}%
+\contentsline {section}{\numberline {3}Présentation du code}{10}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Solveur}{10}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Maillage disponibles et architecture}{12}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}Forme des résultats}{12}{subsection.3.3}%
+\contentsline {section}{\numberline {4}Comparaison des résultats avec la théorie}{13}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Solution analytique}{13}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Résultats}{15}{subsection.4.2}%
+\contentsline {subsubsection}{\numberline {4.2.1}Comparaison du potentiel}{15}{subsubsection.4.2.1}%
+\contentsline {subsubsection}{\numberline {4.2.2}Comparaison du champ électrique}{16}{subsubsection.4.2.2}%
+\contentsline {subsubsection}{\numberline {4.2.3}Influence du nombre de nœuds}{18}{subsubsection.4.2.3}%
+\contentsline {section}{\numberline {5}Conclusion}{19}{section.5}%

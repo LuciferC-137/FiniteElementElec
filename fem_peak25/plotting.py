@@ -511,7 +511,7 @@ class Plotter:
         
         im = ax.imshow(z, extent=[x_min, x_max, y_min, y_max], origin='lower', 
                 cmap=cmap, interpolation='bilinear')
-        ax.get_figure().colorbar(im, label='Potential')
+        ax.get_figure().colorbar(im, label='Potential (V)')
         ax.set_xlabel('x')
         ax.set_ylabel('y')
         ax.set_title('Continous potential over the mesh')
@@ -557,7 +557,7 @@ class Plotter:
         # 'flat' shading -> one value per triangle
         tpc = ax.tripcolor(triang, facecolors=E_values, cmap=cmap,
                             shading='flat', edgecolors='k', linewidth=0.2)
-        ax.get_figure().colorbar(tpc, label='|E| Electric field intensity')
+        ax.get_figure().colorbar(tpc, label='Electric field intensity (V/m)')
         ax.set_title("Electric field |∇V|")
         ax.set_xlabel("x")
         ax.set_ylabel("y")

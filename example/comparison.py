@@ -15,7 +15,7 @@ from fem_peak25.solver import Solver
 from fem_peak25.plotting import Plotter
 from fem_peak25.logger import Logger
 
-# --------------------------- PARAMETERS ---------------------------
+# --------------------------------- PARAMETERS ---------------------------------
 
 # Number of nodes in the circumference
 n = 180
@@ -27,11 +27,12 @@ theta0 = 3 * np.pi / 4
 potential = 1.0
 
 # Resolution of the pictures
-res = 400
+res = 500
 
-# ------------------------------ MAIN ------------------------------
+# ------------------------------------ MAIN ------------------------------------
 # Creating mesh
 mesh : Mesh = MeshBuilder().build_circular_mesh(n, L, theta0)
+print(f"Number of nodes: {mesh.size()}")
 
 # Fixing nodes that are subject to a boudary condition
 for i in range(mesh.size()):
@@ -48,23 +49,22 @@ solver = Solver(mesh)
 u = solver.solve_mesh()
 
 # Computing the continuous solution
-#z = solver.compute_continous_solutions(mesh, u, res=res)
-z = 0
+z = solver.compute_continous_solutions(mesh, u, res=res)
 
 # Computing electric field
 e = solver.compute_element_gradients(mesh, u)
 
-# --------------- ANALYTICAL SOLUTION --------------------------------
+# ----------------------- ANALYTICAL SOLUTION ----------------------------------
 
 order = 10
 
 def a_n(n):
     denom = (2 * n + 1)
     pi_cub = np.pi * np.pi * np.pi
-    res = 32 / (denom * denom * denom * pi_cub)
+    result = 32 / (denom * denom * denom * pi_cub)
     if (n % 2 == 0):
-        return res
-    return -res
+        return result
+    return -result
 
 def phi_n(n, r, theta, theta0):
     return r**((2 * n + 1) * np.pi / 2 / theta0) \
@@ -77,7 +77,6 @@ def V(r, theta, theta0, order):
     return result
 
 # Computing the analytical solution
-
 X = np.linspace(-L/2, L/2, res)
 Y = np.linspace(-L/2, L/2, res)
 
@@ -86,7 +85,7 @@ Z = np.zeros((res, res))
 cnt = 0
 for i in range(res):
     for j in range(res):
-        Logger().log_prc("Computing analytical solutions", cnt, res * res)
+        Logger().log_prc("Computing analytical potential", cnt, res * res)
         cnt += 1
         x, y = X[j], Y[i]
         r = np.sqrt(x**2 + y**2)
@@ -98,49 +97,86 @@ for i in range(res):
                 Z[i, j] = V(r, theta, theta0, order)
         else:
             Z[i, j] = np.nan
-Logger().log_prc_done("Computing analytical solutions")
+Logger().log_prc_done("Computing analytical potential")
 
-# Computing electric field
+# Difference between the analytical and numerical solutions
+
+pot_diff = np.nan * np.ones((res, res))
+for i in range(res):
+    for j in range(res):
+        if np.isnan(Z[i, j]):
+            pot_diff[i, j] = np.nan
+        elif Z[i, j] == 0:
+            pot_diff[i, j] = 0
+        else:
+            pot_diff[i, j] = np.abs((Z[i, j] - z[i, j]) / Z[i, j]) * 100
+
+# ------------------------------ ELECTRIC FIELD --------------------------------
+# Computing the electric field (numerical)
 Ex, Ey = np.gradient(Z)
 E = np.sqrt(Ex**2 + Ey**2)
 
-E_minus_e = np.zeros((res, res))
+def E_r_n(r, theta, n, theta0):
+    return a_n(n) * (2 * n + 1) * np.pi / 2 / theta0 \
+        * r**((2 * n + 1) * np.pi / 2 / theta0 - 1) \
+        * np.cos((2 * n + 1) * np.pi * theta / 2 / theta0)
+
+def E_theta_n(r, theta, n, theta0):
+    return  a_n(n) * (2 * n + 1) * np.pi / 2 / theta0 \
+        * r**((2 * n + 1) * np.pi / 2 / theta0 - 1) \
+        * np.sin((2 * n + 1) * np.pi * theta / 2 / theta0)
+
+Er = np.zeros((res, res))
+Eth = np.zeros((res, res))
+
 cnt = 0
 for i in range(res):
     for j in range(res):
-        Logger().log_prc("Computing electric field difference",
-                         cnt, res * res)
+        Logger().log_prc("Computing analytical electric field", cnt, res * res)
         cnt += 1
         x, y = X[j], Y[i]
-        found = False
-        for element_idx, element in mesh.elements.items():
-            nodes = element.nodes
-            x1, y1 = nodes[0].x, nodes[0].y
-            x2, y2 = nodes[1].x, nodes[1].y
-            x3, y3 = nodes[2].x, nodes[2].y
+        r = np.sqrt(x**2 + y**2)
+        if r <= L / 2:
+            theta = np.arctan2(y, x)
+            if np.abs(theta) < theta0:
+                for n in range(order + 1):
+                    Er[i, j] -= E_r_n(r, theta, n, theta0)
+                    Eth[i, j] -= E_theta_n(r, theta, n, theta0)
+        else:
+            Er[i, j] = np.nan
+            Eth[i, j] = np.nan
+Logger().log_prc_done("Computing analytical electric field")
+E = np.sqrt(Er**2 + Eth**2)
 
-            denominator = (y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3)
-            if abs(denominator) < 1e-10:
-                continue
+# ---------------------------- ELECTRIC FIELD DIFFERENCE -----------------------
 
-            lambda1 = ((y2 - y3) * (x - x3) + (x3 - x2) * (y - y3)) / denominator
-            lambda2 = ((y3 - y1) * (x - x3) + (x1 - x3) * (y - y3)) / denominator
-            lambda3 = 1 - lambda1 - lambda2
+E_minus_e = np.nan * np.ones((res, res))
 
-            if 0 <= lambda1 <= 1 and 0 <= lambda2 <= 1 and 0 <= lambda3 <= 1:
-                E_minus_e[i, j] = E[i, j] - e[element_idx]
-                found = True
-                break
+x = np.array([node.x for node in mesh])
+y = np.array([node.y for node in mesh]) 
+x_min, x_max = np.min(x), np.max(x)
+y_min, y_max = np.min(y), np.max(y)
 
-        if not found:
-            E_minus_e[i, j] = np.nan
+cnt = 0
+for element in mesh.iter_elements():
+    Logger().log_prc("Computing electric field difference",
+                     cnt, len(mesh.elements))
+    pixels = Solver._pixels_in_el(element, res, x_min, x_max, y_min, y_max)
+    for i, j in pixels:
+        if np.isnan(E[j, i]):
+            E_minus_e[j, i] = np.nan
+        elif E[j, i] == 0:
+            E_minus_e[j, i] = 0
+        else:
+            E_minus_e[j, i] = np.abs(E[j, i] - e[cnt]) / np.abs(E[j, i]) * 100
+    cnt += 1
 Logger().log_prc_done("Computing electric field difference")
 
 
-# --------------------------- PLOTTING ------------------------------
+# --------------------------------- PLOTTING -----------------------------------
 
-plot_potential = False
-plot_potential_difference = False
+plot_potential = True
+plot_potential_difference = True
 
 plot_electric_field = True
 plot_electric_field_difference = True
@@ -149,7 +185,7 @@ if plot_potential:
     fig, (ax_fem, ax_ana) = plt.subplots(1, 2)
     Plotter.plot_continous(mesh, z, ax = ax_fem)
     ax_ana : Axes
-    im = ax_ana.imshow(Z, extent=[-L, L, -L, L], origin='lower')
+    im = ax_ana.imshow(Z, origin='lower')
     ax_ana.get_figure().colorbar(im, label='Potential')
     ax_ana.set_xlabel('x')
     ax_ana.set_ylabel('y')
@@ -163,22 +199,22 @@ if plot_potential:
 if plot_potential_difference:
     fig, ax = plt.subplots()
     ax : Axes
-    im = ax.imshow(np.abs(Z - z.reshape(res, res)),
-                extent=[-L, L, -L, L], origin='lower', cmap='coolwarm')
-    fig.colorbar(im, label='Difference')
+    im = ax.imshow(pot_diff, vmin = 0, vmax = 100,
+                   origin='lower', cmap='coolwarm')
+    fig.colorbar(im, label='Relative Difference (%)')
     ax.axis("equal")
     ax.set_xlabel('x')
     ax.set_ylabel('y')
-    ax.set_title('Difference')
+    ax.set_title('Potential Difference (%)')
     plt.show()
     Plotter.savefig(fig, "difference")
 
 if plot_electric_field:
-    fig, (ax_ana, ax_fem) = plt.subplots(1, 2)
+    fig, (ax_fem, ax_ana) = plt.subplots(1, 2)
     Plotter.plot_discontinuous_field(mesh, e, ax = ax_fem)
     ax_ana : Axes
-    im = ax_ana.imshow(E, extent=[-L, L, -L, L], origin='lower')
-    ax_ana.get_figure().colorbar(im, label='Potential')
+    im = ax_ana.imshow(E, origin='lower')
+    ax_ana.get_figure().colorbar(im, label='Electric field intensity (V/m)')
     ax_ana.set_xlabel('x')
     ax_ana.set_ylabel('y')
     ax_ana.set_title('Analytical solution')
@@ -191,13 +227,12 @@ if plot_electric_field:
 if plot_electric_field_difference:
     fig, ax = plt.subplots()
     ax : Axes
-    im = ax.imshow(np.abs(E_minus_e),
-                extent=[-L, L, -L, L], origin='lower', cmap='coolwarm')
-    fig.colorbar(im, label='Difference')
+    im = ax.imshow(E_minus_e, origin='lower', cmap='coolwarm')
+    fig.colorbar(im, label='Relative Difference (%)')
     ax.axis("equal")
     ax.set_xlabel('x')
     ax.set_ylabel('y')
-    ax.set_title('Difference')
+    ax.set_title('Electric field Difference (%)')
     plt.show()
     Plotter.savefig(fig, "difference_elec")
     plt.close()

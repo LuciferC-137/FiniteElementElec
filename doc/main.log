@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.9.26)  22 MAR 2025 11:13
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.9.26)  23 MAR 2025 13:43
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -611,7 +611,7 @@ Package hyperref Info: Link coloring OFF on input line 39.
 \openout4 = `main.out'.
 
 \c@lstlisting=\count438
-<img/Logo_IMT_Atlantique.png, id=76, 1204.5pt x 713.66624pt>
+<img/Logo_IMT_Atlantique.png, id=92, 1204.5pt x 713.66624pt>
 File: img/Logo_IMT_Atlantique.png Graphic file (type png)
 <use img/Logo_IMT_Atlantique.png>
 Package pdftex.def Info: img/Logo_IMT_Atlantique.png  used on input line 44.
@@ -625,126 +625,140 @@ Overfull \hbox (4.09407pt too wide) in paragraph at lines 53--57
 
 [1
 
-{d:/Programmes/LaTeX/texlive/2024/texmf-var/fonts/map/pdftex/updmap/pdftex.map} <./img/Logo_IMT_Atlantique.png>]
-<img/schema.png, id=87, 320.69812pt x 293.59688pt>
-File: img/schema.png Graphic file (type png)
-<use img/schema.png>
-Package pdftex.def Info: img/schema.png  used on input line 76.
-(pdftex.def)             Requested size: 224.48714pt x 205.5164pt.
+{d:/Programmes/LaTeX/texlive/2024/texmf-var/fonts/map/pdftex/updmap/pdftex.map} <./img/Logo_IMT_Atlantique.png>] (./main.toc)
+\tf@toc=\write5
+\openout5 = `main.toc'.
+
 
 
 
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.97 \newpage
-              [1 <./img/schema.png>]
+l.68 \newpage
+              [1]
+<img/schema.png, id=132, 320.69812pt x 293.59688pt>
+File: img/schema.png Graphic file (type png)
+<use img/schema.png>
+Package pdftex.def Info: img/schema.png  used on input line 82.
+(pdftex.def)             Requested size: 224.48714pt x 205.5164pt.
 
-[2]
+
+[2 <./img/schema.png>]
 
 [3]
-<img/pointe_ef.png, id=128, 383.4325pt x 364.36125pt>
+
+[4]
+<img/pointe_ef.png, id=175, 383.4325pt x 364.36125pt>
 File: img/pointe_ef.png Graphic file (type png)
 <use img/pointe_ef.png>
-Package pdftex.def Info: img/pointe_ef.png  used on input line 234.
+Package pdftex.def Info: img/pointe_ef.png  used on input line 242.
 (pdftex.def)             Requested size: 268.40092pt x 255.05113pt.
 
 
-[4 <./img/pointe_ef.png>]
-<img/element.png, id=137, 252.945pt x 160.6pt>
+[5 <./img/pointe_ef.png>]
+<img/element.png, id=184, 252.945pt x 160.6pt>
 File: img/element.png Graphic file (type png)
 <use img/element.png>
-Package pdftex.def Info: img/element.png  used on input line 265.
+Package pdftex.def Info: img/element.png  used on input line 273.
 (pdftex.def)             Requested size: 126.47218pt x 80.29979pt.
 
 
-[5 <./img/element.png>]
-Overfull \hbox (5.59396pt too wide) in paragraph at lines 368--369
+[6 <./img/element.png>]
+Overfull \hbox (5.59396pt too wide) in paragraph at lines 376--377
  []$\OMS/cmsy/m/n/10 ,$ 
  []
 
 
 
-[6]
-
 [7]
 
 [8]
-Overfull \hbox (10.65327pt too wide) in paragraph at lines 669--672
-\OT1/cmr/m/n/10 Dans cette sec-tion est donc d^^Setaill^^Se le fonc-tion-nement math^^Sematique du solveur et com-ment il impl^^Semente
- []
 
+[9]
 
+[10{d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc}]
+Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on input line 712.
 
-[9{d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc}]
-Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on input line 704.
-
-
-[10]
 
 [11]
+<img/plot_ex.png, id=308, 452.98836pt x 338.00679pt>
+File: img/plot_ex.png Graphic file (type png)
+<use img/plot_ex.png>
+Package pdftex.def Info: img/plot_ex.png  used on input line 805.
+(pdftex.def)             Requested size: 362.39117pt x 270.40579pt.
 
-[12]
-<img/comparison.png, id=277, 826.91335pt x 423.71901pt>
+
+[12 <./img/plot_ex.png>]
+
+[13]
+
+[14]
+<img/comparison.png, id=334, 826.91335pt x 423.71901pt>
 File: img/comparison.png Graphic file (type png)
 <use img/comparison.png>
-Package pdftex.def Info: img/comparison.png  used on input line 901.
+Package pdftex.def Info: img/comparison.png  used on input line 956.
 (pdftex.def)             Requested size: 413.45566pt x 211.85898pt.
-<img/difference.png, id=279, 484.49808pt x 405.29016pt>
+<img/difference.png, id=336, 721.18233pt x 409.69862pt>
 File: img/difference.png Graphic file (type png)
 <use img/difference.png>
-Package pdftex.def Info: img/difference.png  used on input line 914.
-(pdftex.def)             Requested size: 242.24844pt x 202.64458pt.
+Package pdftex.def Info: img/difference.png  used on input line 970.
+(pdftex.def)             Requested size: 360.59029pt x 204.8488pt.
 
 
-LaTeX Warning: `h' float specifier changed to `ht'.
+LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-<img/comparison_elec.png, id=280, 819.83089pt x 423.71901pt>
+
+
+[15 <./img/comparison.png>]
+
+[16 <./img/difference.png>]
+<img/comparison_elec.png, id=350, 836.81433pt x 423.71901pt>
 File: img/comparison_elec.png Graphic file (type png)
 <use img/comparison_elec.png>
-Package pdftex.def Info: img/comparison_elec.png  used on input line 942.
-(pdftex.def)             Requested size: 409.91444pt x 211.85898pt.
-
-LaTeX Warning: `h' float specifier changed to `ht'.
-
-<img/difference_elec.png, id=281, 723.20589pt x 409.69862pt>
+Package pdftex.def Info: img/comparison_elec.png  used on input line 1015.
+(pdftex.def)             Requested size: 418.40614pt x 211.85898pt.
+<img/difference_elec.png, id=352, 714.82257pt x 409.69862pt>
 File: img/difference_elec.png Graphic file (type png)
 <use img/difference_elec.png>
-Package pdftex.def Info: img/difference_elec.png  used on input line 949.
-(pdftex.def)             Requested size: 361.60205pt x 204.8488pt.
-
-LaTeX Warning: `h' float specifier changed to `ht'.
+Package pdftex.def Info: img/difference_elec.png  used on input line 1031.
+(pdftex.def)             Requested size: 357.41042pt x 204.8488pt.
 
 
+[17 <./img/comparison_elec.png> <./img/difference_elec.png>]
+<img/difference_elec_7651.png, id=361, 707.08968pt x 811.15848pt>
+File: img/difference_elec_7651.png Graphic file (type png)
+<use img/difference_elec_7651.png>
+Package pdftex.def Info: img/difference_elec_7651.png  used on input line 1045.
+(pdftex.def)             Requested size: 353.54398pt x 405.57825pt.
 
-[13 <./img/comparison.png>]
 
-[14 <./img/difference.png> <./img/comparison_elec.png>]
+[18 <./img/difference_elec_7651.png>]
 
-[15 <./img/difference_elec.png>] (./main.aux)
+[19] (./main.aux)
  ***********
 LaTeX2e <2024-06-01> patch level 2
 L3 programming layer <2024-09-10>
  ***********
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: A5B5657E982DC997BA737BE8A66666BC;3408.
+(rerunfilecheck)             Checksum: F338A35C9F9FFCB43AE66A047025CE5C;4134.
 Package logreq Info: Writing requests to 'main.run.xml'.
 \openout1 = `main.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 19244 strings out of 473578
- 328242 string characters out of 5723691
- 1574205 words of memory out of 5000000
- 41822 multiletter control sequences out of 15000+600000
- 561616 words of font info for 49 fonts, out of 8000000 for 9000
+ 19504 strings out of 473578
+ 333471 string characters out of 5723691
+ 1574493 words of memory out of 5000000
+ 42065 multiletter control sequences out of 15000+600000
+ 561962 words of font info for 50 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  66i,14n,81p,756b,1306s stack positions out of 10000i,1000n,20000p,200000b,200000s
-<d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb>
-Output written on main.pdf (16 pages, 9215268 bytes).
+<d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb><d:/Programmes/LaTeX/texlive/2024/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb>
+Output written on main.pdf (20 pages, 13328470 bytes).
 PDF statistics:
- 403 PDF objects out of 1000 (max. 8388607)
- 333 compressed objects within 4 object streams
- 144 named destinations out of 1000 (max. 500000)
- 185 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 486 PDF objects out of 1000 (max. 8388607)
+ 405 compressed objects within 5 object streams
+ 157 named destinations out of 1000 (max. 500000)
+ 227 words of extra memory for PDF output out of 10000 (max. 10000000)
 

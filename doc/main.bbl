@@ -16,5 +16,34 @@
   {}
 \endgroup
 
+
+\refsection{0}
+  \datalist[entry]{nty/global//global/global/global}
+    \entry{Gossiaux}{misc}{}{}
+      \name{author}{1}{}{%
+        {{hash=cc7c9585a6fe19b59ec4684b575ab2a3}{%
+           family={Gossiaux},
+           familyi={G\bibinitperiod},
+           given={Pol-Bernard},
+           giveni={P\bibinithyphendelim B\bibinitperiod}}}%
+      }
+      \strng{namehash}{cc7c9585a6fe19b59ec4684b575ab2a3}
+      \strng{fullhash}{cc7c9585a6fe19b59ec4684b575ab2a3}
+      \strng{fullhashraw}{cc7c9585a6fe19b59ec4684b575ab2a3}
+      \strng{bibnamehash}{cc7c9585a6fe19b59ec4684b575ab2a3}
+      \strng{authorbibnamehash}{cc7c9585a6fe19b59ec4684b575ab2a3}
+      \strng{authornamehash}{cc7c9585a6fe19b59ec4684b575ab2a3}
+      \strng{authorfullhash}{cc7c9585a6fe19b59ec4684b575ab2a3}
+      \strng{authorfullhashraw}{cc7c9585a6fe19b59ec4684b575ab2a3}
+      \field{sortinit}{G}
+      \field{sortinithash}{32d67eca0634bf53703493fb1090a2e8}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{note}{UV Outils du Numérique, DEMIN* - IMT Atlantique}
+      \field{title}{Introduction à la méthode des éléments finis}
+      \field{year}{2025}
+    \endentry
+  \enddatalist
+\endrefsection
 \endinput
 

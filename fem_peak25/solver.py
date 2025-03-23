@@ -128,8 +128,7 @@ class Solver:
     
     @staticmethod
     def compute_continous_solutions(mesh: Mesh, u: np.ndarray,
-                                    res: int = 500,
-                                    margin: float = 0.05) -> np.ndarray:
+                                    res: int = 500) -> np.ndarray:
         """
         Method to compute the continuous solutions of the mesh
         by interpolating according to the values of the polynomes
@@ -143,8 +142,6 @@ class Solver:
                 The solution of the mesh.
             res: int
                 The resolution of the grid. default: 500 (high)
-            margin: float
-                The margin to add to the mesh. default: 0.05
 
         Returns
         -------
@@ -156,55 +153,146 @@ class Solver:
         
         x_min, x_max = np.min(x), np.max(x)
         y_min, y_max = np.min(y), np.max(y)
-        
-        margin_val = margin * max(x_max - x_min, y_max - y_min)
-        x_min -= margin_val
-        x_max += margin_val
-        y_min -= margin_val
-        y_max += margin_val
-        
-        x_grid = np.linspace(x_min, x_max, res)
-        y_grid = np.linspace(y_min, y_max, res)
-        X, Y = np.meshgrid(x_grid, y_grid)
 
-        z = np.zeros_like(X)
+        # Using np.nan to make transparent the values outside the mesh
+        z = np.nan * np.ones((res, res))
         
-        for i in range(res):
-            for j in range(res):
-                Logger().log_prc("Computing continuous solutions",
-                                 i * res + j, res * res)
-                pixel_x, pixel_y = X[i, j], Y[i, j]
-                found = False
+        i = 0
+        for element in mesh.iter_elements():
+            Logger().log_prc("Computing continuous solutions", i,
+                            len(mesh.elements))
+            i += 1
+            pixels = Solver._pixels_in_el(element, res, x_min,
+                                          x_max, y_min, y_max)
+            
+            nodes = element.nodes
+            x1, y1 = nodes[0].x, nodes[0].y
+            x2, y2 = nodes[1].x, nodes[1].y
+            x3, y3 = nodes[2].x, nodes[2].y
+            A = np.array([[1, x1, y1],
+                          [1, x2, y2],
+                          [1, x3, y3]])
+            
+            v = np.array([u[nodes[0].index], u[nodes[1].index],
+                        u[nodes[2].index]])
+            
+            try:
+                # Finding interpolation coefficients (of polynomes B_i)
+                coeffs = np.linalg.solve(A, v)
                 
-                for element_idx, element in mesh.elements.items():
-                    nodes : list[Node] = element.nodes
-                    x1, y1 = nodes[0].x, nodes[0].y
-                    x2, y2 = nodes[1].x, nodes[1].y
-                    x3, y3 = nodes[2].x, nodes[2].y
+                for px, py in pixels:
+                    # Convert pixels to physical coordinates
+                    phys_x = px / (res - 1) * (x_max - x_min) + x_min
+                    phys_y = py / (res - 1) * (y_max - y_min) + y_min
                     
-                    denominator = (y2 - y3) * (x1 - x3) + (x3 - x2) * (y1 - y3)
+                    interpolated_value = coeffs[0] + coeffs[1] \
+                        * phys_x + coeffs[2] * phys_y
+                    z[py, px] = interpolated_value
                     
-                    if abs(denominator) < 1e-10:
-                        continue
-                    
-                    lambda1 = ((y2 - y3) * (pixel_x - x3) + (x3 - x2)
-                            * (pixel_y - y3)) / denominator
-                    lambda2 = ((y3 - y1) * (pixel_x - x3) + (x1 - x3)
-                            * (pixel_y - y3)) / denominator
-                    lambda3 = 1 - lambda1 - lambda2
-                    
-                    if 0 <= lambda1 <= 1 and 0 <= lambda2 <= 1 \
-                       and 0 <= lambda3 <= 1:
-                        potential = lambda1 * u[nodes[0].index] + lambda2 \
-                            * u[nodes[1].index] + lambda3 * u[nodes[2].index]
-                        z[i, j] = potential
-                        found = True
-                        break
-                
-                if not found:
-                    z[i, j] = np.nan
+            except np.linalg.LinAlgError:
+                # This error could happen if the element is degenerated
+                continue
+
         Logger().log_prc_done("Computing continuous solutions")
         return z
+
+    @staticmethod
+    def _pixels_in_el(element: Element, res: int,
+                    x_min: float, x_max: float,
+                    y_min: float, y_max: float) -> list[tuple[int, int]]:
+        """
+        Method to find the pixels inside an element.
+        
+        Parameters
+        ----------
+            element: Element
+                The element.
+            res: int
+                The resolution of the 'continous' array.
+            x_min, x_max, y_min, y_max: float
+                The minimum and maximum values of the mesh (physical).
+                
+        Returns
+        -------
+            list[tuple[int, int]]: List of coordinates of the 
+            pixels inside the element.
+        """
+        x1, y1 = element.nodes[0].x, element.nodes[0].y
+        x2, y2 = element.nodes[1].x, element.nodes[1].y
+        x3, y3 = element.nodes[2].x, element.nodes[2].y
+
+        px1, py1 = Solver._coord_to_pix(x1, y1, res, x_min, x_max, y_min, y_max)
+        px2, py2 = Solver._coord_to_pix(x2, y2, res, x_min, x_max, y_min, y_max)
+        px3, py3 = Solver._coord_to_pix(x3, y3, res, x_min, x_max, y_min, y_max)
+
+        x_min_pix = max(min(px1, px2, px3), 0)
+        x_max_pix = min(max(px1, px2, px3), res - 1)
+        y_min_pix = max(min(py1, py2, py3), 0)
+        y_max_pix = min(max(py1, py2, py3), res - 1)
+
+        pixels = []
+        # Here, we will iterate over the pixels in the small box
+        # that includes the element
+        for px in range(x_min_pix, x_max_pix + 1):
+            for py in range(y_min_pix, y_max_pix + 1):
+                # Converting pixels to physical coordinates
+                x = px / (res - 1) * (x_max - x_min) + x_min
+                y = py / (res - 1) * (y_max - y_min) + y_min
+
+                # Calculating barycentric coordinates
+                denom = ((y2 - y3)*(x1 - x3) + (x3 - x2)*(y1 - y3))
+
+                if abs(denom) < 1e-10:  # Avoiding division by zero
+                    continue  # Degenerated triangle
+
+                a = ((y2 - y3)*(x - x3) + (x3 - x2)*(y - y3)) / denom
+                b = ((y3 - y1)*(x - x3) + (x1 - x3)*(y - y3)) / denom
+                c = 1 - a - b
+
+                # Checking for the pixel to be inside the element
+                if 0 <= a <= 1 and 0 <= b <= 1 and 0 <= c <= 1:
+                    pixels.append((px, py))
+
+        return pixels
+
+    
+    @staticmethod
+    def _coord_to_pix(x: float, y: float, res: int,
+                    x_min: float, x_max: float,
+                    y_min: float, y_max: float) -> tuple[int, int]:
+        """
+        Method to convert the coordinates to pixels.
+
+        Parameters
+        ----------
+            x: float
+                The x coordinate.
+            y: float
+                The y coordinate.
+            res: int
+                The resolution of the grid.
+            x_min: float
+                The minimum x value of the mesh.
+            x_max: float
+                The maximum x value of the mesh.
+            y_min: float
+                The minimum y value of the mesh.
+            y_max: float
+                The maximum y value of the mesh.
+
+        Returns
+        -------
+            tuple[int, int]: The pixel coordinates.
+        """
+        # Utiliser (res - 1) pour s'assurer que les valeurs extrêmes sont mappées aux limites du tableau
+        px = int((x - x_min) / (x_max - x_min) * (res - 1))
+        py = int((y - y_min) / (y_max - y_min) * (res - 1))
+        
+        # S'assurer que les valeurs sont dans les limites
+        px = max(0, min(px, res - 1))
+        py = max(0, min(py, res - 1))
+        
+        return px, py
     
     @staticmethod
     def compute_element_gradients(mesh : Mesh,
