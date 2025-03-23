@@ -3,3 +3,16 @@ example/output/**.png
 **build/
 **egg-info/
 output/
+**main.aux**
+**main.bbl**
+**main.bcf**
+**main.blg**
+**main.fdb**
+**main.fls**
+**main.log
+**main.toc
+**main.out
+**main.run.xml
+**main.synctex.gz
+
+
