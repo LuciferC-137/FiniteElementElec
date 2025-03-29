@@ -15,13 +15,13 @@ geometries are a circle and a square. The circle is defined by its radius and an
 
 ```
 fem_peak25/
-├── docs/
+├── doc/
 │   ├── img/
 │   ├── biblio.bib
 │   ├── main.pdf
 │   └── main.tex
 ├── output/
-├── examples/
+├── example/
 │   ├── comparison.py
 │   ├── peak_circle.py
 │   └── peak_square.py
@@ -38,7 +38,7 @@ fem_peak25/
 ```
 
 The main package functions are in `fem_peak25/` and the examples lies in `examples/`. Those example
-files do not need to install the package to be ran. The documentation is in `docs/` (already compiled).
+files do not need to install the package to be ran. The documentation is in `doc/` (already compiled).
 
 ## Installation
 
@@ -60,20 +60,20 @@ from fem_peak25.plotting import Plotter
 
 ## Quick Start
 
-If you simply need to test the package, you can run the examples in the `examples/` folder. To run the examples, navigate to the root of the project and run one of the following command:
+If you simply need to test the package, you can run the examples in the `example/` folder. To run the examples, navigate to the root of the project and run one of the following command:
 
 ```bash
-python examples/peak_circle.py
+python example/peak_circle.py
 ```
 
 ```bash
-python examples/peak_square.py
+python example/peak_square.py
 ```
 
 ## Documentation
 
-The documentation is in the `docs/` folder. The main file is `main.tex`. To compile the documentation, you need to have a LaTeX compiler installed. The documentation is
-compiled by default in the `docs/` folder, therefore you can also access the compiled documentation in the `docs/main.pdf` file.
+The documentation is in the `doc/` folder. The main file is `main.tex`. To compile the documentation, you need to have a LaTeX compiler installed. The documentation is
+compiled by default in the `doc/` folder, therefore you can also access the compiled documentation in the `doc/main.pdf` file.
 
 This documentation is written in french and describes the mathematical background of the Finite Element Method and the implementation of the package.
 
