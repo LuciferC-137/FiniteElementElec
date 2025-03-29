@@ -206,8 +206,14 @@ des $-g_i$ et $x$ le vecteur colonne des $x_i$:
 Ce qui équivaut à résoudre:
 
 \begin{equation}
+    \label{eq:pb_gen}
     A \cdot x = b
 \end{equation}
+
+L'équation \ref{eq:pb_gen} démontre la possiblité de résoudre notre
+problème grâce à la MEF. Nous allons maintenant développer
+comment utiliser un maillage afin d'expliciter ce système
+linéaire.
 
 \subsection{Méthode des éléments finis}
 
@@ -234,8 +240,9 @@ de Laplace par la méthode des éléments finis. Dans un premier temps,
 nous avons choisi de considérer une géométrie simple, mais les calculs
 qui vont suivre demeurent généraux jusqu'à la section \ref{sec:cadre_du_pb}.
 
-La figure \ref{fig:pointe_ef} représente la discrétisation du domaine en éléments
-finis. Nous nous placerons en deux dimensions.
+La figure \ref{fig:pointe_ef} représente une discrétisation possible
+du domaine en éléments finis.
+Nous nous placerons en deux dimensions.
 
 \begin{figure}[h]
     \centering
@@ -622,7 +629,7 @@ Si aucune contrainte n'existait, le système à résoudre serait:
 
 Mais certaines contributions doivent être retirées de la matrice K.
 En effet, il ne faut pas calculer les variations du nœud $i$ lorsque
-celui-ci est sur le bord, donc les contributions des autres nœud
+celui-ci est sur le bord, donc les contributions des autres nœuds
 à la valeur en $i$ doivent être éliminées. Pour ce faire, il suffit
 de fixer à $0$ la colonne $i$ de la matrice $K$
 (sauf la valeur en $(i, i)$, ainsi le nœud $i$ sera le seul à contribuer
@@ -630,7 +637,7 @@ de fixer à $0$ la colonne $i$ de la matrice $K$
 fixe dans le second membre à la place de $0$.
 
 Admettons dans l'exemple suivant que le nœud $i$ se trouve au bord et
-est fixée à la valeur $U_i$
+est fixé à la valeur $U_i$
 Voici les modifications à apporter à la matrice:
 
 \begin{equation}
@@ -668,7 +675,7 @@ Et c'est bien ce calcul qui sera réalisé dans notre code.
 
 \section{Présentation du code}
 
-L'architecture du code, la présentation des classes et de leurs
+L'architecture du code, ses classes et leurs
 méthodes sont déjà décrits extensivement dans le \verb|README|
 du projet ainsi que sur le wiki associé.
 (\href{https://github.com/LuciferC-137/FiniteElementElec}{Lien vers GitHub})
@@ -700,7 +707,7 @@ comment se déroule l'algorithme:
 \begin{enumerate}
     \item Pour chaque éléments du maillage,
     on calcule la matrice de raideur élémentaire $K^{[e]}$.
-    \item Pour chaque noeud, on ajoute ses contributions en "ajoutant" $K^{[e]}$ à l'endroit approprié de $K$.
+    \item Pour chaque nœud, on ajoute ses contributions en "ajoutant" $K^{[e]}$ à l'endroit approprié de $K$.
     \item On applique les conditions limites à $K$ pour obtenir $K^*$ et on détermine $F$.
     \item On résout le système linéaire $K^* \cdot u = F$.
 \end{enumerate}
@@ -767,7 +774,7 @@ est présentée au listing \ref{lst:solver} ci-après.
 
 \newpage
 
-\subsection{Maillage disponibles et architecture}
+\subsection{Maillages disponibles et architecture}
 
 Le code a été pensé selon une programmation orientée objet
 avec le langage de programmation \verb|Python|.
@@ -784,7 +791,7 @@ Chacun de ces maillages implémente une classe abstraite
 le maillage afin d'être traité par le solveur.
 
 Puisque le solveur est codé de manière générale, un utilisateur
-pourrait définir son propre maillage grâce aux classe de notre
+pourrait définir son propre maillage grâce aux classes de notre
 code et le résoudre simplement.
 
 Nous faisons également remarquer que la création d'un maillage
@@ -800,7 +807,7 @@ Le code offre la possibilité d'afficher de nombreux graphiques
 différents, que ce soit pour assister la construction de maillage
 ou pour sauvegarder des résultats. La figure \ref{fig:plot_ex}
 montre un exemple d'affichage de résultats et de maillage
-pour un nombre de noeuds faible.
+pour un nombre de nœuds faibles.
 
 \begin{figure}[!h]
     \centering
@@ -814,7 +821,7 @@ pour un nombre de noeuds faible.
 \section{Comparaison des résultats avec la théorie}
 
 Pour comparer notre code avec la théorie,
-nous proposonq de revenir à la situation initiale
+nous proposons de revenir à la situation initiale
 d'une pointe dans une géométrie circulaire.
 
 Nous utiliserons donc le maillage circulaire proposé
@@ -832,10 +839,10 @@ Nous avons posé la condition limite suivante:
 En notant $V_1$ la fonction de potentiel en $r=1$.
 
 Au vu de la géométrie, on cherche une décomposition
-de la fonction potentiel en coordonnées sphériques
-avec des solutions connus de l'équation de Laplace,
+de la fonction du potentiel en coordonnées sphériques
+avec des solutions connues de l'équation de Laplace,
 c'est-à-dire les harmoniques sphériques (car leurs
-laplaciens sont nuls).
+laplaciens sont nuls) en deux dimensions.
 
 Ces fonctions notées $\Phi_n(r, \theta)$ s'écrivent:
 
@@ -878,7 +885,7 @@ les coefficients $a_n$ comme suit:
 \end{equation}
 
 Nous allons résoudre cette équation pour tout n en réalisant
-deux intégrations par partie.
+deux intégrations par parties.
 
 \begin{align*}
     a_n & = \frac{1}{\theta_0}
@@ -937,6 +944,10 @@ Au vu de la forme des coefficients, on peut considérer que
 les dix premiers termes de la série suffisent à obtenir une
 très bonne approximation de la solution.
 
+Dans la suite, pour effectuer des comparaisons avec 
+le champ électrique, nous dériverons terme à terme
+la série exprimant $V(r,\theta)$.
+
 \newpage
 
 \subsection{Résultats}
@@ -946,12 +957,12 @@ Nous avons donc résolu le problème présenté en section
 \ref{sec:situation_physique} avec notre code et comparé
 les résultats avec un calcul analytique à l'ordre 10
 en utilisant la formule l'équation \ref{eq:analytic}.
-Les résultats sont visible figure \ref{fig:analytic_vs_numeric}.
+Les résultats sont visibles figure \ref{fig:analytic_vs_numeric}.
 
 \subsubsection{Comparaison du potentiel}
 
 La figure \ref{fig:analytic_vs_numeric} montre la comparaison
-entre les solutions numérique (à gauche) et analytique (à droite).
+entre les solutions numériques (à gauche) et analytiques (à droite).
 
 \begin{figure}[!h]
     \centering
@@ -983,9 +994,9 @@ contraint de suivre le bord de celle-ci.
 On aurait pu ajouter
 cette contrainte, mais nous avons préféré garder une construction
 de maillage simple et automatique, qui introduit donc des 
-discontinuités aux arrêtes de la pointe.
+discontinuités aux arêtes de la pointe.
 
-Malgré tout, les différences de potentiels restent satisfaisante
+Malgré tout, les différences de potentiels restent satisfaisantes
 sur l'ensemble du maillage. L'échelle a néanmoins
 été forcée à 100\%, des différences plus élevées apparaissent au niveau
 de la pointe elle-même, principalement à cause de la géométrie
@@ -1022,7 +1033,7 @@ numériques (à gauche) et analytiques (à droite).
 La figure \ref{fig:field_diff} montre la différence relative entre
 les champs électriques numériques et analytiques
 $(E_{th} - E_{calc}) / E_{th}$ (en valeur absolue). Une fois
-de plus, les différences sont minimes expecté sur la pointe,
+de plus, les différences sont minimes excepté sur la pointe,
 principalement à cause de la géométrie du maillage.
 
 On observe également les mêmes discontinuités sur le bord
@@ -1056,11 +1067,11 @@ différences visibles sur l'ensemble du maillage diminuent,
 de même que la valeur maximale de la différence, ce qui
 signifie que nous nous approchons d'une meilleure solution.
 
-On peut aussi voir que la valeur de champ à la pointe
-se rapproche de la valeur calculée (non affiché dans ce document).
+On peut aussi voir que la valeur du champ à la pointe
+se rapproche de la valeur calculée (non affichée dans ce document).
 
 Cette tendance devrait bien entendu être étudiée pour un
-plus grand nombre d'échantillon pour être validée.
+plus grand nombre d'échantillons pour être validée.
 
 Un maillage adaptatif pourrait également aider,
  en offrant une meilleure précision dans les

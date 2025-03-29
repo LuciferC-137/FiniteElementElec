@@ -59,7 +59,7 @@ class Plotter:
                 Logger().raise_error(f"The directory '{dir}' does not exist.")
 
         fig.savefig(os.path.join(output_dir, name + '.png'),
-                    dpi=1000, bbox_inches='tight', transparent=True)
+                    dpi=300, bbox_inches='tight', transparent=True)
 
     @staticmethod
     def _ask_for_continue(mesh: Mesh):
