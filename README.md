@@ -20,8 +20,8 @@ fem_peak25/
 │   ├── biblio.bib
 │   ├── main.pdf
 │   └── main.tex
-├── output/
 ├── example/
+│   ├── output/
 │   ├── comparison.py
 │   ├── peak_circle.py
 │   └── peak_square.py
